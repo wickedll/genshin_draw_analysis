@@ -18,4 +18,4 @@
 
 # 4.LICENSE
 
-[LICENSE](https://github.com/wickedll/genshin_sign/blob/main/LICENSE)
+[LICENSE](https://github.com/wickedll/genshin_draw_analysis/blob/master/LICENSE)
