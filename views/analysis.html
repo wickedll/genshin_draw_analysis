@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>info</title>
+	<script src="https://unpkg.com/vue@3.1.1/dist/vue.global.prod.js"></script>
+	<script src="../js/echarts.js"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue-echarts@4.0.2"></script> -->
+	<link rel="stylesheet" href="../styles/analysis.css"/>
+</head>
+<body>
+
+<div id="app"></div>
+
+
+<script type="module">
+	import App from "../components/analysis/app.js";
+	Vue.createApp( App ).mount( "#app" );
+</script>
+<script>
+	function parseURL( url ) {
+		let urlParams = url.substring( 1 ).split( "&" );
+		let result = {};
+		for ( let p of urlParams ) {
+			const [ key, value ] = p.split( "=" );
+			result[ key ] = value;
+		}
+		return result;
+	}
+
+	function request( url ) {
+		const Http = new XMLHttpRequest();
+		Http.open( "GET", url, false );
+		Http.send();
+		return JSON.parse( Http.responseText );
+	}
+	function getRandomNum(Min, Max) {
+		var Range = Max - Min;
+		var Rand = Math.random();
+		return Min + Math.round(Rand * Range);
+	}
+</script>
+
+</body>
+</html>
+
+<style>
+	#app {
+		width: 1700px;
+		height: 900px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+</style>
