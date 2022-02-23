@@ -100,7 +100,6 @@ export default class Renderer {
 			throw new Error( "浏览器未启动" );
 		}
 		const url: string = this.getURL( route, params );
-		console.log(url);
 		const page: puppeteer.Page = await this.browser.newPage();
 		await page.goto( url );
 
