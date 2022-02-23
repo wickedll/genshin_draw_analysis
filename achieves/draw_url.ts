@@ -16,7 +16,7 @@ export async function main(
 	const url = await redis.getString(`genshin_draw_analysis_url-${ userID }`);
 	
 	if(url && url !== api_url){
-		await redis.delHash(`genshin_draw_analysis_data-${ userID }`);
+		await redis.delHash(`genshin_draw_analysis_data-${ userID }`, "data");
 	}
 
 	await redis.setString( `genshin_draw_analysis_url-${ userID }`, api_url );
