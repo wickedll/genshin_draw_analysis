@@ -16,6 +16,12 @@
 
 出现问题原因为linux中文字体缺失， 可参考 [此文章](https://www.cnblogs.com/helios-fz/p/13706157.html)安装字体后  重启bot
 
+docker部署可参考[此issue](https://github.com/wickedll/genshin_draw_analysis/issues/5) 安装字体
+
+## 3.2提示visit too frequently
+
+此为mhy接口限制 某一时间内请求次数超过最大限制，此时只需将draw_analysis.ts里面的sleep延时数值调高一点即可（49行 调500-700 不行就再调大一点） [issue](https://github.com/wickedll/genshin_draw_analysis/issues/4)
+
 # 4.LICENSE
 
 [LICENSE](https://github.com/wickedll/genshin_draw_analysis/blob/master/LICENSE)
