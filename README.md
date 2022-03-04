@@ -22,6 +22,15 @@ docker部署可参考[此issue](https://github.com/wickedll/genshin_draw_analysi
 
 此为mhy接口限制 某一时间内请求次数超过最大限制，此时只需将draw_analysis.ts里面的sleep延时数值调高一点即可（49行 调500-700 不行就再调大一点） [issue](https://github.com/wickedll/genshin_draw_analysis/issues/4)
 
-# 4.LICENSE
+## 3.3提示authkey timeout或authkey error
+
+authkey过期或有误，重新获取url设置。
+
+# 4.更新日志
+
+- URL支持web页与api 2022/03/04
+- 修复5星平均出货次数计算错误问题 2022/03/04
+
+# 5.LICENSE
 
 [LICENSE](https://github.com/wickedll/genshin_draw_analysis/blob/master/LICENSE)
