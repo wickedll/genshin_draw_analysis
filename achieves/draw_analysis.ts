@@ -32,7 +32,6 @@ export async function main(
 			let length = size;
 			do {
 				url = `${url2}&game_biz=hk4e_cn&page=${page}&size=${size}&end_id=${endCode}&gacha_type=${element}`;
-				bot.logger.info(url);
 				let response = await fetch(url, { method: "GET" });
 				let data = await response.json();
 				if(data.retcode !== 0){

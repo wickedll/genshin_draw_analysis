@@ -272,6 +272,7 @@ export default defineComponent( {
 			const element = result[index];
 			const key = parseInt(element.key);
 			let total = element.data.length;
+			let total5 = 0;
 			element.data.reverse();
 			let w5 = 0;
 			let j5 = 0;
@@ -293,12 +294,14 @@ export default defineComponent( {
 				if(item.rank_type == 5 && item.item_type == '武器'){
 					w5 ++;
 					arr5.push({count,name: item.name});
+					total5 += count;
 					count = 0;
 					index5 = index;
 				}
 
 				if(item.rank_type == 5 && item.item_type == '角色'){
 					j5 ++;
+					total5 += count;
 					arr5.push({count,name: item.name});
 					count = 0;
 					index5 = index;
@@ -316,7 +319,7 @@ export default defineComponent( {
 				w4,
 				w3,
 				history: arr5,
-				per: total ==0 ? 0 : parseFloat(total/(w5 + j5)).toFixed(2),
+				per: total5 ==0 ? 0 : parseFloat(total5/(w5 + j5)).toFixed(2),
 				total,
 				wc: total > 0 ? (total - index5 - 1) : 0,
 				lv5: total ==0 ? (0+'%') : (parseFloat((w5 + j5)/total*100).toFixed(2) + '%'),
