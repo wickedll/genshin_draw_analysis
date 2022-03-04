@@ -8,7 +8,11 @@ export async function main(
 	const { user_id: userID, raw_message: msg } = messageData;
 	let api_url = 'https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?';
 	try {
-		api_url += msg.split('index.html?')[1].split('&amp;game_biz=hk4e_cn')[0];
+		if(msg.indexOf("getGachaLog?") > -1){
+			api_url += msg.split('getGachaLog?')[1].split('&amp;game_biz=hk4e_cn')[0];
+		}else{
+			api_url += msg.split('index.html?')[1].split('&amp;game_biz=hk4e_cn')[0];
+		}
 	} catch (error) {
 		await sendMessage("URL输入错误！");
 		return;
