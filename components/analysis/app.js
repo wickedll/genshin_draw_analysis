@@ -273,7 +273,7 @@ export default defineComponent( {
 			const key = parseInt(element.key);
 			let total = element.data.length;
 			let total5 = 0;
-			element.data.reverse();
+			element.data.sort(sortData);
 			let w5 = 0;
 			let j5 = 0;
 			let w4 = 0;

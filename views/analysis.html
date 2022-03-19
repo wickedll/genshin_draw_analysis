@@ -39,6 +39,10 @@
 		var Rand = Math.random();
 		return Min + Math.round(Rand * Range);
 	}
+
+	function sortData(a, b) {
+		return Number(a.id) - Number(b.id)
+	}
 </script>
 
 </body>
