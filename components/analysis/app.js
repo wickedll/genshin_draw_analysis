@@ -334,6 +334,10 @@ export default defineComponent( {
 			if(nameColor[name]){
 				return nameColor[name];
 			}
+			//颜色用尽 返回默认颜色
+			if(Object.keys(usedColor).length >= colors.length){
+				return "#800000";
+			}
 			let color = colors[index];
 			while(usedColor[color]){
 				index = getRandomNum(0, colors.length - 1);
@@ -341,7 +345,6 @@ export default defineComponent( {
 			}
 			usedColor[color] = 1;
 			nameColor[name] = color;
-			console.log(nameColor);
 			return color;
 		}
 		return {
@@ -352,9 +355,13 @@ export default defineComponent( {
 	}
 } );
 
+//颜色池
 const colors = [
 	"orange", "#EA0000", "#FF359A", "#FF00FF", "#9F35FF", "#2828FF", "#0072E3", "#00CACA", "#02DF82", "#00BB00", "#82D900", "#EA7500", "#F75000",
-	"#AD5A5A", "#5151A2", "#8F4586"
+	"#AD5A5A", "#5151A2", "#8F4586", "#FFB6C1", "#FFC0CB", "#DC143C", "#DB7093", "#FF69B4", "#FF1493", "#C71585", "#DA70D6", "#D8BFD8", "#DDA0DD", 
+	"#EE82EE", "#8B008B", "#800080", "#BA55D3", "#9400D3", "#9932CC", "#4B0082", "#8A2BE2", "#9370DB", "#7B68EE", "#6A5ACD", "#483D8B", "#E6E6FA",
+	"#00BFFF", "#5F9EA0", "#00CED1", "#008B8B", "#00FA9A", "#00FF00", "#FFFF00", "#FFD700", "#DAA520", "#FFDEAD", "#FF8C00", "#F4A460", "#D2691E",
+	"#FFDAB9", "#8B4513", "#FFA07A", "#FF7F50", "#FF4500", "#E9967A", "#FF6347", "#FA8072", "#F08080", "#B22222"
 ]
 let usedColor = {}
 let nameColor = {}
