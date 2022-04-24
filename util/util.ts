@@ -14,4 +14,23 @@ function getRandomNum(Min, Max) {
 	return Min + Math.round(Rand * Range);
 }
 
-export { sleep, getRandomNum };
+function parseID( msg: string ): number {
+	if ( !msg ) {
+		return 1;
+	}
+	const id: number = parseInt( msg );
+	if ( !Number.isNaN( id ) ) {
+		return id;
+	}
+	
+	const res: string[] | null = msg.match( /(\d+)/g );
+	if ( res ) {
+		const list: string[] = res.sort( ( x, y ) => x.length - y.length );
+		return parseInt( list[0] );
+	} else {
+		return 1;
+	}
+}
+
+
+export { sleep, getRandomNum, parseID };

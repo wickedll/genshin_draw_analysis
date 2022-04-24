@@ -22,20 +22,20 @@ const draw_url: OrderConfig = {
 const draw_analysis: OrderConfig = {
 	type: "order",
 	cmdKey: "genshin.draw.analysis",
-	desc: [ "抽卡分析", "" ],
-	headers: [ "draw_analysis" ],
-	detail: "使用设置的抽卡记录URL重新拉取数据并合并历史数据分析",
-	regexps: [ "" ],
+	desc: [ "抽卡分析", "(样式)"  ],
+	headers: [ "draw_analysis"],
+	detail: "使用设置的抽卡记录URL重新拉取数据并合并历史数据分析, 样式1pc 2phone",
+	regexps: [ "(\\d+)?" ],
 	main: "achieves/draw_analysis"
 };
 
 const draw_analysis_history: OrderConfig = {
 	type: "order",
 	cmdKey: "genshin.draw.analysis.history",
-	desc: [ "抽卡分析历史记录", "" ],
+	desc: [ "抽卡分析历史记录", "(样式)" ],
 	headers: [ "draw_analysis_history" ],
-	regexps: [ "" ],
-	detail: "使用历史数据分析",
+	regexps: [ "(\\d+)?" ],
+	detail: "使用历史数据分析, 样式1pc 2phone",
 	main: "achieves/draw_analysis_history"
 };
 

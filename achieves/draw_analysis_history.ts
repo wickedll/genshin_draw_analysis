@@ -2,12 +2,13 @@ import { InputParameter } from "@modules/command";
 import bot from "ROOT";
 import { RenderResult } from "@modules/renderer";
 import { renderer } from "../init";
+import { parseID } from "../util/util";
 
 
 export async function main(
 	{ sendMessage, messageData, redis }: InputParameter
 ): Promise<void> {
-	const { user_id: userID} = messageData;
+	const { user_id: userID, raw_message: idMsg } = messageData;
 	let uid = '';
 	try {
 		uid = await redis.getString(`genshin_draw_analysis_curr_uid-${userID}`);
@@ -21,8 +22,9 @@ export async function main(
 		return;
 	}
 	
+	let id = parseID(idMsg);
 	const res: RenderResult = await renderer.asCqCode(
-		"/analysis.html",
+		id ===1 ? "/analysis.html" : "/analysis-phone.html",
 		{ qq: userID }
 	);
 	if ( res.code === "ok" ) {

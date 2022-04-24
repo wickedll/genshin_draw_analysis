@@ -1,7 +1,7 @@
 import { InputParameter } from "@modules/command";
 import fetch from "node-fetch";
 import bot from "ROOT";
-import {sleep} from "../util/util";
+import {parseID, sleep} from "../util/util";
 import { RenderResult } from "@modules/renderer";
 import { renderer } from "../init";
 
@@ -9,7 +9,7 @@ import { renderer } from "../init";
 export async function main(
 	{ sendMessage, messageData, redis }: InputParameter
 ): Promise<void> {
-	const { user_id: userID} = messageData;
+	const { user_id: userID, raw_message: idMsg } = messageData;
 	let url = await redis.getString( `genshin_draw_analysis_url-${ userID }`);
 	if(url.indexOf("http") <= -1){
 		sendMessage( "请先私聊bot draw_url_set进行抽卡记录url添加！" );
@@ -69,9 +69,9 @@ export async function main(
 		await redis.setString(`genshin_draw_analysis_curr_uid-${userID}`, uid);
 	}
 	
-
+	let id = parseID(idMsg);
 	const res: RenderResult = await renderer.asCqCode(
-		"/analysis.html",
+		id ===1 ? "/analysis.html" : "/analysis-phone.html",
 		{ qq: userID }
 	);
 	if ( res.code === "ok" ) {
