@@ -20,7 +20,7 @@ export default defineComponent( {
 		} );
 		const mainImage = computed( () => {
 			const type = props.data.type === "角色" ? "character" : "weapon";
-			return `https://adachi-bot.oss-cn-beijing.aliyuncs.com/Version2/thumb/${ type }/${ props.data.name }.png`;
+			return `https://adachi-bot.oss-cn-beijing.aliyuncs.com/Version2/thumb/${ type }/${ encodeURI(props.data.name) }.png`;
 		} );
 		
 		return {
