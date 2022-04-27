@@ -24,7 +24,7 @@ export async function main(
 	
 	let id = parseID(idMsg);
 	const res: RenderResult = await renderer.asCqCode(
-		id ===1 ? "/analysis.html" : "/analysis-phone.html",
+		id ===1 ? "/analysis-phone.html" : "/analysis.html",
 		{ qq: userID }
 	);
 	if ( res.code === "ok" ) {
