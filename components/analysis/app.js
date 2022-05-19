@@ -7,7 +7,7 @@ const template =
 			<div id="up-role" style="width:400px;height:400px;"></div>
 			<span class="time">{{info["301"].time}}</span>
 			<div class="info">
-				<span class="total">一共 <span class="lj">{{ info["301"].total }}</span> 抽 已累计 <span class="wc">{{info["301"].wc}}</span> 抽未出5星</span>
+				<span class="total">总计 <span class="lj">{{ info["301"].total }}</span> 抽 已累计 <span class="wc">{{info["301"].wc}}</span> 抽未出5星</span>
 				<span class="five">5星：{{info["301"].w5+info["301"].j5}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["301"].lv5}}]</span>
 				<span class="four">4星：{{info["301"].w4+info["301"].j4}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["301"].lv4}}]</span>
 				<span class="third">3星：{{info["301"].w3}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["301"].lv3}}]</span>
@@ -25,7 +25,7 @@ const template =
 			<div id="up-arms" style="width:400px;height:400px;"></div>
 			<span class="time">{{info["302"].time}}</span>
 			<div class="info">
-				<span class="total">一共 <span class="lj">{{ info["302"].total }}</span> 抽 已累计 <span class="wc">{{info["302"].wc}}</span> 抽未出5星</span>
+				<span class="total">总计 <span class="lj">{{ info["302"].total }}</span> 抽 已累计 <span class="wc">{{info["302"].wc}}</span> 抽未出5星</span>
 				<span class="five">5星：{{info["302"].w5+info["302"].j5}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["302"].lv5}}]</span>
 				<span class="four">4星：{{info["302"].w4+info["302"].j4}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["302"].lv4}}]</span>
 				<span class="third">3星：{{info["302"].w3}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["302"].lv3}}]</span>
@@ -43,7 +43,7 @@ const template =
 			<div id="permanent" style="width:400px;height:400px;"></div>
 			<span class="time">{{info["200"].time}}</span>
 			<div class="info">
-				<span class="total">一共 <span class="lj">{{ info["200"].total }}</span> 抽 已累计 <span class="wc">{{info["200"].wc}}</span> 抽未出5星</span>
+				<span class="total">总计 <span class="lj">{{ info["200"].total }}</span> 抽 已累计 <span class="wc">{{info["200"].wc}}</span> 抽未出5星</span>
 				<span class="five">5星：{{info["200"].w5+info["200"].j5}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["200"].lv5}}]</span>
 				<span class="four">4星：{{info["200"].w4+info["200"].j4}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["200"].lv4}}]</span>
 				<span class="third">3星：{{info["200"].w3}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["200"].lv3}}]</span>
@@ -62,7 +62,7 @@ const template =
 			<div id="novice" style="width:400px;height:400px;"></div>
 			<span class="time">{{info["100"].time}}</span>
 			<div class="info">
-				<span class="total">一共 <span class="lj">{{ info["100"].total }}</span> 抽 已累计 <span class="wc">{{info["100"].wc}}</span> 抽未出5星</span>
+				<span class="total">总计 <span class="lj">{{ info["100"].total }}</span> 抽 已累计 <span class="wc">{{info["100"].wc}}</span> 抽未出5星</span>
 				<span class="five">5星：{{info["100"].w5+info["100"].j5}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["100"].lv5}}]</span>
 				<span class="four">4星：{{info["100"].w4+info["100"].j4}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["100"].lv4}}]</span>
 				<span class="third">3星：{{info["100"].w3}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["100"].lv3}}]</span>

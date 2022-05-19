@@ -3,16 +3,20 @@ import fetch from "node-fetch";
 import bot from "ROOT";
 import {parseID, sleep} from "../util/util";
 import { RenderResult } from "@modules/renderer";
-import { renderer } from "../init";
+import { renderer, pageFunction } from "../init";
+import { Order } from "@modules/command";
+import { AuthLevel } from "@modules/management/auth";
 
 
 export async function main(
-	{ sendMessage, messageData, redis }: InputParameter
+	{ sendMessage, messageData, redis, auth }: InputParameter
 ): Promise<void> {
 	const { user_id: userID, raw_message: idMsg } = messageData;
 	let url = await redis.getString( `genshin_draw_analysis_url-${ userID }`);
 	if(url.indexOf("http") <= -1){
-		sendMessage( "请先私聊bot draw_url_set进行抽卡记录url添加！" );
+		const a: AuthLevel = await auth.get( userID );
+		const ANALYSIS_URL = <Order>bot.command.getSingle( "genshin.draw.analysis.url", a );
+		sendMessage( `请先私聊bot 使用 ${ ANALYSIS_URL.getHeaders()[0] } 进行抽卡记录url添加！` );
 		return;
 	}
 	var arrEntities={'lt':'<','gt':'>','nbsp':' ','amp':'&','quot':'"'};
@@ -70,8 +74,13 @@ export async function main(
 	}
 	
 	let id = parseID(idMsg);
-	const res: RenderResult = await renderer.asCqCode(
-		id ===1 ? "/analysis.html" : "/analysis-phone.html",
+	// const res: RenderResult = await renderer.asCqCode(
+	// 	id ===1 ? "/analysis-phone.html" : "/analysis.html",
+	// 	{ qq: userID }
+	// );
+	const res: RenderResult = await renderer.asForFunction(
+		id ===1 ? "/analysis-phone.html" : "/analysis.html",
+		pageFunction, null,
 		{ qq: userID }
 	);
 	if ( res.code === "ok" ) {

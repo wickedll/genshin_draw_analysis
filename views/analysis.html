@@ -7,6 +7,7 @@
 	<script src="../js/echarts.js"></script>
 	<!-- <script src="https://cdn.jsdelivr.net/npm/vue-echarts@4.0.2"></script> -->
 	<link rel="stylesheet" href="../styles/analysis.css"/>
+	<link rel="stylesheet" href="https://fonts.loli.net/css?family=ZCOOL+KuaiLe|ZCOOL+QingKe+HuangYou|ZCOOL+XiaoWei&display=swap">
 </head>
 <body>
 
@@ -43,6 +44,15 @@
 	function sortData(a, b) {
 		return Number(a.id) - Number(b.id)
 	}
+	function sleep(numberMillis) {
+		var now = new Date(); 
+		var exitTime = now.getTime() + numberMillis; 
+		while (true) { 
+			now = new Date(); 
+			if (now.getTime() > exitTime) 
+				return; 
+    	}
+	}
 </script>
 
 </body>
@@ -56,5 +66,6 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		font-family: ZCOOL KuaiLe;
 	}
 </style>

@@ -1,7 +1,7 @@
 import { InputParameter } from "@modules/command";
 import bot from "ROOT";
 import { RenderResult } from "@modules/renderer";
-import { renderer } from "../init";
+import { renderer, pageFunction } from "../init";
 import { parseID } from "../util/util";
 
 
@@ -23,8 +23,13 @@ export async function main(
 	}
 	
 	let id = parseID(idMsg);
-	const res: RenderResult = await renderer.asCqCode(
-		id ===1 ? "/analysis.html" : "/analysis-phone.html",
+	// const res: RenderResult = await renderer.asCqCode(
+	// 	id ===1 ? "/analysis-phone.html" : "/analysis.html",
+	// 	{ qq: userID }
+	// );
+	const res: RenderResult = await renderer.asForFunction(
+		id ===1 ? "/analysis-phone.html" : "/analysis.html",
+		pageFunction, null,
 		{ qq: userID }
 	);
 	if ( res.code === "ok" ) {

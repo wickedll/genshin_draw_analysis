@@ -3,8 +3,23 @@ import { OrderConfig } from "@modules/command";
 import { MessageScope } from "@modules/message";
 import bot from "ROOT";
 import { createServer } from "./server";
-import Renderer from "./util/renderer";
+import { Renderer, PageFunction } from "@modules/renderer";
+import { sleep } from "./util/util";
+import puppeteer from "puppeteer";
 export let renderer: Renderer;
+
+export let pageFunction: PageFunction = async(page: puppeteer.Page) => {
+	if(page.url().indexOf("analysis.html") > -1){
+		sleep(2000);
+	}
+	const option: puppeteer.ScreenshotOptions = { encoding: "base64" };
+	const element = await page.$( '#app' );
+	const result = <string>await element?.screenshot( option );
+	const base64: string = `base64://${ result }`;
+	const cqCode: string = `[CQ:image,file=${ base64 }]`;
+	return cqCode;
+	
+}
 
 
 const draw_url: OrderConfig = {
@@ -41,7 +56,7 @@ const draw_analysis_history: OrderConfig = {
 
 export async function init(): Promise<PluginSetting> {
 	/* 实例化渲染器 */
-	renderer = new Renderer(
+	renderer = bot.renderer.register(
 		"genshin_draw_analysis", "/views",
 		58693, "#app"
 	);
