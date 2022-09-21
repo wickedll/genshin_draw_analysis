@@ -2,7 +2,7 @@ import { URL, URLSearchParams } from "url";
 import { RefreshCatch } from "@modules/management/refresh";
 import puppeteer from "puppeteer";
 import bot from "ROOT";
-import {sleep} from "./util";
+import { sleep } from "./util";
 
 interface RenderSuccess {
 	code: "ok";
@@ -104,7 +104,7 @@ export default class Renderer {
 		await page.goto( url );
 
 		if(url.indexOf("analysis.html") > -1){
-			sleep(2000);
+			await sleep( 2000 );
 		}
 		
 		const option: puppeteer.ScreenshotOptions = { encoding: "base64" };

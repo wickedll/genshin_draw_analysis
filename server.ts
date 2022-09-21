@@ -9,6 +9,6 @@ export function createServer( port: number, logger: Logger ): void {
 	app.use( "/api/analysis", AnalysisRouter );
 	
 	app.listen( port, () => {
-		logger.info( "抽卡记录服务已启动" );
+		logger.info( `[genshin_draw_analysis]插件的 Express 服务器已启动, 端口为: ${ port }` );
 	} );
 }

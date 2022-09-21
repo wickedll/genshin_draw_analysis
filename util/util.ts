@@ -1,17 +1,14 @@
-function sleep(numberMillis) { 
-    var now = new Date(); 
-    var exitTime = now.getTime() + numberMillis; 
-    while (true) { 
-    now = new Date(); 
-    if (now.getTime() > exitTime) 
-        return; 
-    } 
+import { randomString } from "#genshin/utils/random";
+import { Md5 } from "md5-typescript";
+
+function getRandomNum( Min, Max ) {
+	let Range = Max - Min;
+	let Rand = Math.random();
+	return Min + Math.round( Rand * Range );
 }
 
-function getRandomNum(Min, Max) {
-	var Range = Max - Min;
-	var Rand = Math.random();
-	return Min + Math.round(Rand * Range);
+async function sleep( ms: number ): Promise<void> {
+	return new Promise( resolve => setTimeout( resolve, ms ) );
 }
 
 function parseID( msg: string ): number {
@@ -32,5 +29,40 @@ function parseID( msg: string ): number {
 	}
 }
 
+function generateDS(): string {
+	const n: string = "dWCcD2FsOUXEstC5f9xubswZxEeoBOTc";
+	const i: number = Date.now() / 1000 | 0;
+	const r: string = randomString( 6 ).toLowerCase();
+	const c: string = Md5.init( `salt=${ n }&t=${ i }&r=${ r }` );
+	
+	return `${ i },${ r },${ c }`;
+}
 
-export { sleep, getRandomNum, parseID };
+export function getGameBiz( first: string ): string {
+	switch ( first ) {
+		case "1":
+			return "hk4e_cn";
+		case "2":
+			return "hk4e_cn";
+		case "5":
+			return "hk4e_cn";
+		default:
+			return "hk4e_global";
+	}
+}
+
+function obj2ParamsStr( obj: object ): string {
+	const params: string[] = [];
+	for ( let key in obj ) {
+		params.push( `${ key }=${ obj[key] }` );
+	}
+	return params.join( '&' );
+}
+
+function cookie2Obj( cookie: string ): any {
+	return decodeURIComponent( cookie ).split( ";" )
+		.map( item => item.split( '=' ) )
+		.reduce( ( acc, [ k, v ] ) => ( acc[k.trim().replace( '"', '' )] = v ) && acc, {} );
+}
+
+export { sleep, getRandomNum, parseID, generateDS, obj2ParamsStr, cookie2Obj };

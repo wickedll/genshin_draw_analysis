@@ -1,9 +1,5 @@
 import { InputParameter } from "@modules/command";
-import bot from "ROOT";
-import { RenderResult } from "@modules/renderer";
-import { renderer, pageFunction } from "../init";
-import { parseID } from "../util/util";
-
+import { analysisHandler } from "#genshin_draw_analysis/achieves/draw_analysis";
 
 export async function main(
 	{ sendMessage, messageData, redis }: InputParameter
@@ -11,31 +7,16 @@ export async function main(
 	const { user_id: userID, raw_message: idMsg } = messageData;
 	let uid = '';
 	try {
-		uid = await redis.getString(`genshin_draw_analysis_curr_uid-${userID}`);
-	} catch (error) {
-		await sendMessage( "暂无历史记录" );
-		return;
-	}
-
-	if(!uid || uid === ''){
+		uid = await redis.getString( `genshin_draw_analysis_curr_uid-${ userID }` );
+	} catch ( error ) {
 		await sendMessage( "暂无历史记录" );
 		return;
 	}
 	
-	let id = parseID(idMsg);
-	// const res: RenderResult = await renderer.asCqCode(
-	// 	id ===1 ? "/analysis-phone.html" : "/analysis.html",
-	// 	{ qq: userID }
-	// );
-	const res: RenderResult = await renderer.asForFunction(
-		id ===1 ? "/analysis-phone.html" : "/analysis.html",
-		pageFunction, null,
-		{ qq: userID }
-	);
-	if ( res.code === "ok" ) {
-		await sendMessage( res.data );
-	} else {
-		bot.logger.error( res.error );
-		await sendMessage( "图片渲染异常，请联系持有者进行反馈" );
+	if ( !uid || uid === '' ) {
+		await sendMessage( "暂无历史记录" );
+		return;
 	}
+	
+	await analysisHandler( idMsg, userID, sendMessage );
 }
