@@ -132,6 +132,11 @@ export async function main(
 				response = await fetch( url, { method: "GET" } );
 				data = await response.json();
 			}
+			if ( data.retcode === -101 ) {
+				await redis.deleteKey( `genshin_draw_analysis_url-${ userID }` );
+				await sendMessage( 'AuthKey 已过期，缓存链接已删除，请重试!' );
+				return;
+			}
 			if ( data.retcode !== 0 ) {
 				await sendMessage( data.message ? data.message : "抽卡记录拉取失败，请检查URL！" );
 				return;
