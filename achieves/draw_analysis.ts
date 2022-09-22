@@ -37,13 +37,22 @@ export async function main(
 	const sn: string = res?.groups?.sn || "";
 	let url = await redis.getString( `genshin_draw_analysis_url-${ userID }` );
 	if ( !url || url.indexOf( "http" ) <= -1 ) {
-		const info: Private | string = await getPrivateAccount( userID, sn, auth );
-		if ( typeof info === "string" ) {
-			await sendMessage( info );
-			return;
+		let info: Private | string | undefined;
+		// 优先从抽卡分析的key中获取Cookie等信息
+		let { cookie, uid: game_uid, server, mysID } = await redis.getHash( `genshin_gacha.cookie.${ userID }` );
+		if ( !cookie ) {
+			// 再从私人服务获取Cookie
+			info = await getPrivateAccount( userID, sn, auth );
+			if ( typeof info === "string" ) {
+				await sendMessage( info );
+				return;
+			}
+			cookie = info.setting.cookie;
+			game_uid = info.setting.uid;
+			server = info.setting.server;
+			mysID = info.setting.mysID;
 		}
 		
-		let { cookie, uid: game_uid, server, mysID } = info.setting;
 		try {
 			const { login_ticket } = cookie2Obj( cookie );
 			if ( !login_ticket ) {
@@ -96,7 +105,11 @@ export async function main(
 			let data = await response.json();
 			if ( data.retcode === 0 ) {
 				// 更新ck
-				await info.replaceCookie( cookie );
+				if ( info && info instanceof Private ) {
+					await info.replaceCookie( cookie );
+				} else {
+					await redis.setHashField( `genshin_gacha.cookie.${ userID }`, "cookie", cookie );
+				}
 				// 校验成功放入缓存，不需要频繁生成URL
 				await redis.setString( `genshin_draw_analysis_url-${ userID }`, tmp, 24 * 60 * 60 );
 			}

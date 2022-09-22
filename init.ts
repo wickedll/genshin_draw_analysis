@@ -26,11 +26,11 @@ export let pageFunction: PageFunction = async ( page: puppeteer.Page ) => {
 const draw_url: OrderConfig = {
 	type: "order",
 	cmdKey: "genshin.draw.analysis.url",
-	desc: [ "原神抽卡记录URL设置", "(记录URL)" ],
+	desc: [ "原神抽卡记录URL设置", "(记录URL|通行证Cookie)" ],
 	headers: [ "su" ],
 	regexps: [ ".+" ],
 	main: "achieves/draw_url",
-	detail: "设置抽卡记录url",
+	detail: "设置抽卡记录url或者米游社通行证的Cookie",
 	scope: MessageScope.Private,
 	ignoreCase: false
 }
@@ -40,7 +40,8 @@ const draw_analysis: OrderConfig = {
 	cmdKey: "genshin.draw.analysis",
 	desc: [ "抽卡分析", "(私人服务序号) (样式)" ],
 	headers: [ "da" ],
-	detail: "使用设置的抽卡记录URL重新拉取数据并合并历史数据分析, 1: pc样式,2: phone样式，如果只传一个参数优先匹配服务序号。",
+	detail: "使用设置的抽卡记录URL重新拉取数据并合并历史数据分析, 1: pc样式,2: phone样式，如果只传一个参数优先匹配服务序号。\n" +
+		"如果设置了抽卡分析的Cookie将优先使用抽卡分析的Cookie，否则将使用私人服务中的Cookie",
 	regexps: [ "(\\d+)?", "(\\d+)?" ],
 	main: "achieves/draw_analysis"
 };

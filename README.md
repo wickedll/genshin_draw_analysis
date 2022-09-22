@@ -16,13 +16,14 @@ header+draw_analysis_history使用历史数据分析
 
 ## 3.1返回图片出现字体乱码
 
-出现问题原因为linux中文字体缺失， 可参考 [此文章](https://www.cnblogs.com/helios-fz/p/13706157.html)安装字体后  重启bot
+出现问题原因为linux中文字体缺失， 可参考 [此文章](https://www.cnblogs.com/helios-fz/p/13706157.html)安装字体后 重启bot
 
 docker部署可参考[此issue](https://github.com/wickedll/genshin_draw_analysis/issues/5) 安装字体
 
 ## 3.2提示visit too frequently
 
-此为mhy接口限制 某一时间内请求次数超过最大限制，此时只需将draw_analysis.ts里面的sleep延时数值调高一点即可（49行 调500-700 不行就再调大一点） [issue](https://github.com/wickedll/genshin_draw_analysis/issues/4)
+此为mhy接口限制 某一时间内请求次数超过最大限制，此时只需将draw_analysis.ts里面的sleep延时数值调高一点即可（49行 调500-700
+不行就再调大一点） [issue](https://github.com/wickedll/genshin_draw_analysis/issues/4)
 
 ## 3.3提示authkey timeout或authkey error
 
@@ -30,6 +31,8 @@ authkey过期或有误，重新获取url设置。
 
 # 4.更新日志
 
+- 在设置抽卡分析链接的指令中增加单独设置抽卡分析`Cookie`的功能，可以与私人服务的`Cookie`独立互不影响，分析时兼容私人服务的`Cookie`优先用单独设置的`Cookie`，没有则使用私人服务中的`Cookie`。
+  2022/09/22
 - 修复分析指令单个参数未生效的问题; 解决`login_ticket`频繁过期需要经常换`Cookie`的问题。2022/09/22
 - 抽卡分析指令增加指定私人服务序号的功能（之前与样式公用值，算是个小 bug ）。2022/09/22
 - 修复缓存中的过期链接导致无法自动生成新的 AuthKey 的问题 2022/09/21
