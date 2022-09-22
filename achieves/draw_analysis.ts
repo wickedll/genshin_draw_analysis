@@ -30,10 +30,14 @@ export async function analysisHandler( idMsg: string, userID: number, sendMessag
 export async function main(
 	{ sendMessage, messageData, redis, auth, logger }: InputParameter
 ): Promise<void> {
-	const { user_id: userID, raw_message: idMsg } = messageData;
+	const { user_id: userID, raw_message } = messageData;
+	const reg = new RegExp( /(?<sn>\d+)?(\s)+(?<style>\d+)?/ );
+	const res: RegExpExecArray | null = reg.exec( raw_message );
+	const style: string = res?.groups?.style || "";
+	const sn: string = res?.groups?.sn || "";
 	let url = await redis.getString( `genshin_draw_analysis_url-${ userID }` );
 	if ( !url || url.indexOf( "http" ) <= -1 ) {
-		const info: Private | string = await getPrivateAccount( userID, idMsg, auth );
+		const info: Private | string = await getPrivateAccount( userID, sn, auth );
 		if ( typeof info === "string" ) {
 			await sendMessage( info );
 			return;
@@ -165,5 +169,5 @@ export async function main(
 		await redis.setString( `genshin_draw_analysis_curr_uid-${ userID }`, uid );
 	}
 	
-	await analysisHandler( idMsg, userID, sendMessage );
+	await analysisHandler( style, userID, sendMessage );
 }
