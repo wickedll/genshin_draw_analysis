@@ -38,10 +38,10 @@ const draw_url: OrderConfig = {
 const draw_analysis: OrderConfig = {
 	type: "order",
 	cmdKey: "genshin.draw.analysis",
-	desc: [ "抽卡分析", "(样式)" ],
+	desc: [ "抽卡分析", "(私人服务序号) (样式)" ],
 	headers: [ "da" ],
-	detail: "使用设置的抽卡记录URL重新拉取数据并合并历史数据分析, 1: pc样式,2: phone样式",
-	regexps: [ "(\\d+)?" ],
+	detail: "使用设置的抽卡记录URL重新拉取数据并合并历史数据分析, 1: pc样式,2: phone样式，如果只传一个参数优先匹配服务序号。",
+	regexps: [ "(\\d+)?", "(\\d+)?" ],
 	main: "achieves/draw_analysis"
 };
 
