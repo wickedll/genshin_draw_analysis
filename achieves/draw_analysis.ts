@@ -31,7 +31,7 @@ export async function main(
 	{ sendMessage, messageData, redis, auth, logger }: InputParameter
 ): Promise<void> {
 	const { user_id: userID, raw_message } = messageData;
-	const reg = new RegExp( /(?<sn>\d+)?(\s)+(?<style>\d+)?/ );
+	const reg = new RegExp( /(?<sn>\d+)?(\s)*(?<style>\d+)?/ );
 	const res: RegExpExecArray | null = reg.exec( raw_message );
 	const style: string = res?.groups?.style || "";
 	const sn: string = res?.groups?.sn || "";
@@ -56,9 +56,12 @@ export async function main(
 			if ( !cookie.includes( "login_uid" ) ) {
 				cookie = cookie + ";login_uid=" + mysID;
 			}
-			const { list } = await getSToken( mysID, login_ticket, cookie );
-			const sToken: string = list[0].token;
-			cookie = cookie + ";stoken=" + sToken;
+			// 如果已有 stoken 就不需要再去请求新的，可以解决 login_ticket 经常过期的问题
+			if ( !cookie.includes( "stoken" ) ) {
+				const { list } = await getSToken( mysID, login_ticket, cookie );
+				const sToken: string = list[0].token;
+				cookie = cookie + ";stoken=" + sToken;
+			}
 			const { authkey, authkey_ver, sign_type }: AuthKey = await generateAuthKey( game_uid, server, cookie );
 			const { gacha_id, gacha_type }: GachaPoolInfo = await updatePoolId();
 			const game_biz: string = getGameBiz( game_uid[0] );
@@ -92,6 +95,8 @@ export async function main(
 			let response = await fetch( tmp, { method: "GET" } );
 			let data = await response.json();
 			if ( data.retcode === 0 ) {
+				// 更新ck
+				await info.replaceCookie( cookie );
 				// 校验成功放入缓存，不需要频繁生成URL
 				await redis.setString( `genshin_draw_analysis_url-${ userID }`, tmp, 24 * 60 * 60 );
 			}
