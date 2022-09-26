@@ -1,11 +1,9 @@
 import { randomString } from "#genshin/utils/random";
 import { Md5 } from "md5-typescript";
-
-function getRandomNum( Min, Max ) {
-	let Range = Max - Min;
-	let Rand = Math.random();
-	return Min + Math.round( Rand * Range );
-}
+import { FakeIdFunc, QiniuOssConfig } from "#genshin_draw_analysis/util/types";
+import Database from "@modules/database";
+import { exec } from "child_process";
+import FileManagement from "@modules/file";
 
 async function sleep( ms: number ): Promise<void> {
 	return new Promise( resolve => setTimeout( resolve, ms ) );
@@ -51,7 +49,7 @@ export function getGameBiz( first: string ): string {
 	}
 }
 
-function obj2ParamsStr( obj: object ): string {
+export function obj2ParamsStr( obj: object ): string {
 	const params: string[] = [];
 	for ( let key in obj ) {
 		params.push( `${ key }=${ obj[key] }` );
@@ -59,10 +57,125 @@ function obj2ParamsStr( obj: object ): string {
 	return params.join( '&' );
 }
 
-function cookie2Obj( cookie: string ): any {
+export function cookie2Obj( cookie: string ): any {
 	return decodeURIComponent( cookie ).split( ";" )
 		.map( item => item.split( '=' ) )
 		.reduce( ( acc, [ k, v ] ) => ( acc[k.trim().replace( '"', '' )] = v ) && acc, {} );
 }
 
-export { sleep, getRandomNum, parseID, generateDS, obj2ParamsStr, cookie2Obj };
+export const fakeIdFn: () => FakeIdFunc = () => {
+	let id = 1000000000000000000;
+	return () => {
+		id = id + 1
+		return id.toString()
+	}
+}
+
+const header_zh_cn = {
+	time: '时间',
+	name: '名称',
+	item_type: '类别',
+	rank_type: '星级',
+	gacha_type: '祈愿类型'
+}
+
+const gacha_types_zh_cn = { "301": "角色活动祈愿", "400": "角色活动祈愿-2", "302": "武器活动祈愿", "200": "常驻祈愿", "100": "新手祈愿" };
+const gacha_types_en_us = {
+	"301": "Character Event Wish",
+	"400": "Character Event Wish-2",
+	"302": "Weapon Event Wish",
+	"200": "Standard Wish",
+	"100": "Beginner's Wish"
+};
+
+const sheet_names_zh_cn = { "301": "角色活动祈愿", "302": "武器活动祈愿", "200": "常驻祈愿", "100": "新手祈愿" };
+const sheet_names_en_us = {
+	"301": "Character Event Wish",
+	"302": "Weapon Event Wish",
+	"200": "Standard Wish",
+	"100": "Beginner's Wish"
+};
+
+export function get_sheet_name( type: string ): string {
+	return sheet_names_zh_cn[type];
+}
+
+export function convert2Lang( key: string, lang: string ): string {
+	return lang === 'zh-cn' ? header_zh_cn[key] : key;
+}
+
+export function convert2Readable( gacha_type: string, lang: string ): string {
+	return lang === 'zh-cn' ? gacha_types_zh_cn[gacha_type] : gacha_types_en_us[gacha_type];
+}
+
+const rank_color = {
+	"3": "ff8e8e8e",
+	"4": "ffa256e1",
+	"5": "ffbd6932",
+}
+
+export function getColor( rank_type: string ): string {
+	return rank_color[rank_type];
+}
+
+export async function upload2Qiniu( file_path: string, file_name: string, qiniu_config: QiniuOssConfig, redis: Database ): Promise<string> {
+	const {
+		form_up: { FormUploader },
+		auth: { digest },
+		rs: { PutPolicy }
+	} = require( "qiniu" );
+	
+	// 获取上传凭证
+	let upload_token: string = await redis.getString( "genshin_gacha.oss.upload_token" );
+	if ( !upload_token ) {
+		const mac = new digest.Mac( qiniu_config.accessKey, qiniu_config.secretKey );
+		const options = {
+			scope: qiniu_config.bucket
+		};
+		const putPolicy = new PutPolicy( options );
+		upload_token = putPolicy.uploadToken( mac );
+		await redis.setString( "genshin_gacha.oss.upload_token", upload_token, 3600 );
+	}
+	
+	// 开始上传
+	const formUploader = new FormUploader();
+	return new Promise( ( resolve, reject ) => {
+		formUploader.putFile( upload_token, `${ qiniu_config.folder }/${ file_name }`, file_path, null, ( respErr, respBody, respInfo ) => {
+			if ( respErr ) {
+				reject( respErr );
+				return;
+			}
+			
+			if ( respInfo.statusCode !== 200 ) {
+				reject( respBody );
+				return;
+			}
+			
+			const { key } = respBody;
+			resolve( `${ qiniu_config.domain }${ key }?attname=${ file_name }` );
+		} );
+	} );
+}
+
+/* 命令执行 */
+export async function execHandle( command: string ): Promise<string> {
+	return new Promise( ( resolve, reject ) => {
+		exec( command, ( error, stdout, stderr ) => {
+			if ( error ) {
+				reject( error );
+			} else {
+				resolve( stdout );
+			}
+		} )
+	} )
+}
+
+export function checkDependencies( file: FileManagement, ...dependencies ): string[] {
+	const path: string = file.getFilePath( "package.json", "root" );
+	const { dependencies: dep } = require( path );
+	// 过滤出未安装的依赖
+	const keys: string[] = Object.keys( dep );
+	return dependencies.filter( dependency => !keys.includes( dependency ) );
+}
+
+export { sleep, parseID, generateDS };

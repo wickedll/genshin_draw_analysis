@@ -65,6 +65,6 @@ export async function main(
 		return;
 	}
 	
-	await redis.setString( `genshin_draw_analysis_url-${ userID }`, api_url, 24 * 60 * 60 );
+	await redis.setString( `genshin_draw_analysis_url-${ userID }.0`, api_url, 24 * 60 * 60 );
 	await sendMessage( "抽卡记录url设置成功！" );
 }
