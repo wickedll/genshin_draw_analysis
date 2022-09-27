@@ -35,7 +35,7 @@ export async function main(
 	const res: RegExpExecArray | null = reg.exec( raw_message );
 	const style: string = res?.groups?.style || "";
 	const sn: string = res?.groups?.sn || "";
-	let url = await redis.getString( `genshin_draw_analysis_url-${ userID }` );
+	let url = await redis.getString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }` );
 	if ( !url || url.indexOf( "http" ) <= -1 ) {
 		let info: Private | string | undefined;
 		// 优先从抽卡分析的key中获取Cookie等信息
@@ -111,7 +111,7 @@ export async function main(
 					await redis.setHashField( `genshin_gacha.cookie.${ userID }`, "cookie", cookie );
 				}
 				// 校验成功放入缓存，不需要频繁生成URL
-				await redis.setString( `genshin_draw_analysis_url-${ userID }`, tmp, 24 * 60 * 60 );
+				await redis.setString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }`, tmp, 24 * 60 * 60 );
 			}
 		} catch ( e ) {
 			logger.error( <string>e );

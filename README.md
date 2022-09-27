@@ -6,11 +6,36 @@
 
 # 2.命令触发
 
-分析前需先私聊bot（header+draw_url_set+抽卡记录URL）设置抽卡记录URL；关于抽卡记录URL获取，许多抽卡记录分析工具都有说明了，这里就不再描述；实在不知道的可以提交issue；
+以下示例为默认指令头。
 
-设置完成后发送header+draw_analysis查询即可（使用设置的抽卡记录URL重新拉取数据并合并历史数据分析）
+- `#su`: 设置抽卡分析链接或者米游社通行证 `Cookie` (`Cookie` 的作用是自动生成抽卡链接，如果没有通过此指令设置 `Cookie` 将会使用你私人服务中的 `Cookie`，具体使用可使用 `#detial`
+  指令查看。 )
+    - 链接获取方式参考[此教程](https://mp.weixin.qq.com/s/WcH6DgBRoAwbnmOlGTJBNg)
+    - `Cookie` 是米游社的通行证页面的 `Cookie`，建议浏览器无痕模式访问 [米哈游通行证](https://user.mihoyo.com/)，登录个人通行证账号后 `F12` 在 `Console`
+      或者控制台栏里输入 `document.cookie` 回车获取。或者在新建书签，在书签的网址处填写下面的代码。
 
-header+draw_analysis_history使用历史数据分析
+```js
+javascript:(function () {
+    let domain = document.domain;
+    let cookie = document.cookie;
+    const text = document.createElement('textarea');
+    text.hidden = true;
+    text.value = cookie;
+    document.body.appendChild(text);
+    text.select();
+    text.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(text.value).then(() => {
+        alert('domain:' + domain + '\ncookie is in clipboard');
+    });
+    document.body.removeChild(text);
+})();
+```
+
+- `#da`: 分析抽卡记录，可选参数为 `私人服务序号` 和 `样式`，比如：`#da 1 2` 即使用私人服务1号的 `Cookie` 和 第2种样式（PC样式）生成分析图，具体使用可使用 `#detial` 指令查看。
+- `#ah`: 历史抽卡分析，即使用之前的数据生成分析图。可选参数为 `样式`，同 `#da` 的此参数。
+- `#export`: 导出抽卡分析数据，可选参数 `json` 或 `excel`，在群聊使用该指令会将结果上传至群文件，在私聊如果 BOT 持有者未配置 OSS 则不能使用。
+- `#import`: 导入抽卡分析数据，可选参数 `json` 或 `excel`，在群聊使用可通过先将文件发到群里再回复那条消息，回复消息的同时使用该指令；在私聊不能使用回复的方式(也许也能行)
+  ，可使用 `#import json https://example.com/abc.json` 这种给一个文件的下载链接导入，此方法群聊、私聊都可用。
 
 # 3.常见问题
 
@@ -31,6 +56,8 @@ authkey过期或有误，重新获取url设置。
 
 # 4.更新日志
 
+- 支持 [UIGF 标准](https://github.com/DGP-Studio/Snap.Genshin/wiki/StandardFormat#export_app)
+  的导入导出；导出时在群聊中使用将上传至群文件，私聊如开启 `OSS` 则上传至 `OSS` ，否则私聊不可用。
 - 在设置抽卡分析链接的指令中增加单独设置抽卡分析`Cookie`的功能，可以与私人服务的`Cookie`独立互不影响，分析时兼容私人服务的`Cookie`优先用单独设置的`Cookie`，没有则使用私人服务中的`Cookie`。
   2022/09/22
 - 修复分析指令单个参数未生效的问题; 解决`login_ticket`频繁过期需要经常换`Cookie`的问题。2022/09/22

@@ -1,14 +1,16 @@
 import { PluginSetting } from "@modules/plugin";
 import { OrderConfig } from "@modules/command";
 import { MessageScope } from "@modules/message";
-import bot from "ROOT";
 import { createServer } from "./server";
 import { PageFunction, Renderer } from "@modules/renderer";
-import { sleep } from "./util/util";
+import { checkDependencies, execHandle, sleep } from "./util/util";
 import puppeteer from "puppeteer";
 import { findFreePort } from "@modules/utils";
+import GachaAnalysisConfig from "#genshin_draw_analysis/module/GachaAnalysisConfig";
+import { BOT } from "@modules/bot";
 
 export let renderer: Renderer;
+export let gacha_config: GachaAnalysisConfig;
 
 export let pageFunction: PageFunction = async ( page: puppeteer.Page ) => {
 	if ( page.url().indexOf( "analysis.html" ) > -1 ) {
@@ -56,17 +58,53 @@ const draw_analysis_history: OrderConfig = {
 	main: "achieves/draw_analysis_history"
 };
 
-export async function init(): Promise<PluginSetting> {
+const export_gacha_log: OrderConfig = {
+	type: "order",
+	cmdKey: "genshin.draw.analysis.export_gacha_log",
+	desc: [ "导出抽卡记录", "[json|excel]" ],
+	headers: [ "export" ],
+	regexps: [ "(json|excel)" ],
+	detail: "导出抽卡记录，目前支持json、excel。",
+	main: "achieves/export"
+};
+
+const import_gacha_log: OrderConfig = {
+	type: "order",
+	cmdKey: "genshin.draw.analysis.import_gacha_log",
+	desc: [ "导入抽卡记录", "[json|excel] (文件下载链接)" ],
+	headers: [ "import" ],
+	regexps: [ "(json|excel)", "(https?:\\/\\/(?:www\\.)?[-a-zA-Z\\d@:%._+~#=]{1,256}\\.[a-zA-Z\\d()]{1,6}\\b[-a-zA-Z\\d()!@:%_+.~#?&/=]*)?" ],
+	detail: "导入抽卡记录，目前支持json、excel。先发送文件，然后回复这个文件消息，在此消息中使用该指令，也可以给一个文件的下载链接。",
+	main: "achieves/import"
+};
+
+export async function init( { logger, file, renderer: botRender, refresh }: BOT ): Promise<PluginSetting> {
+	gacha_config = GachaAnalysisConfig.create( file );
+	refresh.registerRefreshableFile( GachaAnalysisConfig.FILE_NAME, gacha_config );
+	
+	logger.info( "开始检测插件需要的依赖是否已安装..." );
+	const dependencies: string[] = [ "exceljs" ];
+	if ( gacha_config.qiniuOss.enable ) {
+		dependencies.push( "qiniu" );
+	}
+	const uninstall_dependencies: string[] = checkDependencies( file, ...dependencies );
+	for ( let uni_dep of uninstall_dependencies ) {
+		logger.info( `检测到 ${ uni_dep } 依赖尚未安装，将自动安装该依赖...` )
+		const stdout = await execHandle( `npm i ${ uni_dep }` );
+		logger.info( stdout );
+	}
+	logger.info( "所有插件需要的依赖已安装" );
+	
 	/* 实例化渲染器 */
-	const port: number = await findFreePort( 58693, bot.logger );
-	renderer = bot.renderer.register(
+	const port: number = await findFreePort( 58693, logger );
+	renderer = botRender.register(
 		"genshin_draw_analysis", "/views",
 		port, "#app"
 	);
-	createServer( port, bot.logger );
+	createServer( port, logger );
 	return {
 		pluginName: "genshin_draw_analysis",
-		cfgList: [ draw_url, draw_analysis, draw_analysis_history ],
+		cfgList: [ draw_url, draw_analysis, draw_analysis_history, export_gacha_log, import_gacha_log ],
 		repo: {
 			owner: "wickedll",
 			repoName: "genshin_draw_analysis"
