@@ -64,10 +64,10 @@ export function cookie2Obj( cookie: string ): any {
 }
 
 export const fakeIdFn: () => FakeIdFunc = () => {
-	let id = 1000000000000000000;
+	let id = 1000000000000000000n;
 	return () => {
-		id = id + 1
-		return id.toString()
+		id = id + 1n
+		return id.toString( 10 );
 	}
 }
 

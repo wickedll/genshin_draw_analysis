@@ -1,5 +1,5 @@
 const template =
-`<div class="statistic-item">
+	`<div class="statistic-item">
     <img class="background" :src="background" alt="ERROR"/>
     <img class="main2" :src="mainImage" alt="ERROR"/>
     <div class="corner"/>
@@ -20,7 +20,8 @@ export default defineComponent( {
 		} );
 		const mainImage = computed( () => {
 			const type = props.data.type === "角色" ? "character" : "weapon";
-			return `https://adachi-bot.oss-cn-beijing.aliyuncs.com/Version2/thumb/${ type }/${ encodeURI(props.data.name) }.png`;
+			const name = simplified( props.data.name );
+			return `https://adachi-bot.oss-cn-beijing.aliyuncs.com/Version2/thumb/${ type }/${ encodeURI( name ) }.png`;
 		} );
 		
 		return {

@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<title>info</title>
 	<script src="https://unpkg.com/vue@3.1.1/dist/vue.global.prod.js"></script>
+	<script src="../js/translate.js"></script>
 	<link rel="stylesheet" href="../styles/analysis-phone.css"/>
 	<link rel="stylesheet" href="https://fonts.loli.net/css?family=ZCOOL+KuaiLe|ZCOOL+QingKe+HuangYou|ZCOOL+XiaoWei&display=swap">
 </head>
@@ -40,7 +41,8 @@
 	}
 
 	function sortData(a, b) {
-		return Number(a.id) - Number(b.id)
+		let result = BigInt(a.id) - BigInt(b.id);
+		return result > 0 ? 1 : result === 0n ? 0 : -1;
 	}
 </script>
 

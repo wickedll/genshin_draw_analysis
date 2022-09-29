@@ -22,8 +22,36 @@ import {
 import { randomSecret } from "@modules/utils";
 import { gacha_config } from "#genshin_draw_analysis/init";
 import bot from "ROOT";
+import { ImgPttElem, segment, Sendable } from "oicq";
+import { Logger } from "log4js";
 
 const gacha_types = [ "301", "400", "302", "100", "200" ];
+
+async function sendExportResult( url: string, logger: Logger, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<void> ) {
+	if ( gacha_config.qrcode ) {
+		const QRCode = require( "qrcode" );
+		const options = {
+			errorCorrectionLevel: 'H',
+			margin: 1,
+			color: {
+				dark: '#000',
+				light: '#FFF',
+			}
+		}
+		QRCode.toDataURL( url, options, ( err: any, image: string ) => {
+			if ( err || !image ) {
+				logger.error( "二维码生成失败", err );
+				sendMessage( `抽卡记录文件已导出，可在浏览器访问 ${ url } 下载查看。` );
+				return;
+			}
+			image = image.replace( "data:image/png;base64,", "" );
+			const qr_code: ImgPttElem = segment.image( `base64://${ image }` );
+			sendMessage( qr_code );
+		} )
+	} else {
+		await sendMessage( `抽卡记录文件已导出，可在浏览器访问 ${ url } 下载查看。` );
+	}
+}
 
 async function export2JSON( export_data: Standard_Gacha, {
 	file,
@@ -34,6 +62,21 @@ async function export2JSON( export_data: Standard_Gacha, {
 	logger,
 	auth
 }: InputParameter ) {
+	if ( export_data.list.length === 0 ) {
+		await sendMessage( `当前账号${ export_data.info || "" }无历史抽卡数据.` );
+		return;
+	}
+	export_data.list.sort( ( a, b ) => {
+		const n1 = BigInt( a.id || "0" );
+		const n2 = BigInt( b.id || "0" );
+		if ( n1 > n2 ) {
+			return 1;
+		} else if ( n1 === n2 ) {
+			return 0;
+		} else {
+			return -1;
+		}
+	} )
 	const json = JSON.stringify( export_data );
 	const file_name = `UIGF-${ export_data.info.uid }-${ moment( export_data.info.export_timestamp * 1000 ).format( "yyMMDDHHmmss" ) }.json`;
 	const tmp_path = resolve( file.root, 'tmp' );
@@ -50,7 +93,7 @@ async function export2JSON( export_data: Standard_Gacha, {
 			const url: string = await upload2Qiniu( export_json_path, file_name, gacha_config.qiniuOss, redis );
 			// 导出后删掉临时文件
 			fs.unlinkSync( export_json_path );
-			await sendMessage( `抽卡记录文件已导出，可在浏览器访问 ${ url } 下载查看。` );
+			await sendExportResult( url, logger, sendMessage );
 			return;
 		} catch ( error ) {
 			logger.error( "抽卡记录导出成功，上传 OSS 失败！", error );
@@ -133,10 +176,14 @@ async function export2Excel( {
 	                             logger,
 	                             auth
                              }: InputParameter ) {
+	if ( list.length === 0 ) {
+		await sendMessage( `当前账号${ uid || "" }无历史抽卡数据.` );
+		return;
+	}
 	// 按照 ID 升序排列
 	list = list.sort( ( a, b ) => {
-		const n1 = parseInt( a.id || "0", 10 );
-		const n2 = parseInt( b.id || "0", 10 );
+		const n1 = BigInt( a.id || "0" );
+		const n2 = BigInt( b.id || "0" );
 		if ( n1 > n2 ) {
 			return 1;
 		} else if ( n1 === n2 ) {
@@ -262,7 +309,7 @@ async function export2Excel( {
 			const url: string = await upload2Qiniu( export_excel_path, file_name, gacha_config.qiniuOss, redis );
 			// 导出后删掉临时文件
 			fs.unlinkSync( export_excel_path );
-			await sendMessage( `抽卡记录文件已导出，可在浏览器访问 ${ url } 下载查看。` );
+			await sendExportResult( url, logger, sendMessage );
 			return;
 		} catch ( error ) {
 			logger.error( "抽卡记录导出成功，上传 OSS 失败！", error );

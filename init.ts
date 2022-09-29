@@ -78,6 +78,16 @@ const import_gacha_log: OrderConfig = {
 	main: "achieves/import"
 };
 
+const del_gacha_log: OrderConfig = {
+	type: "order",
+	cmdKey: "genshin.draw.analysis.del_gacha_log",
+	desc: [ "清除抽卡记录", "" ],
+	headers: [ "del" ],
+	regexps: [ "" ],
+	detail: "删除上次抽卡统计使用的uid，如果要清除其他账号请重新设置链接或者Cookie再使用一次抽卡统计指令即可切换默认账号。(此举是为了验证你是此uid的拥有者，避免误删他人的数据。)",
+	main: "achieves/del"
+};
+
 export async function init( { logger, file, renderer: botRender, refresh }: BOT ): Promise<PluginSetting> {
 	gacha_config = GachaAnalysisConfig.create( file );
 	refresh.registerRefreshableFile( GachaAnalysisConfig.FILE_NAME, gacha_config );
@@ -86,6 +96,9 @@ export async function init( { logger, file, renderer: botRender, refresh }: BOT 
 	const dependencies: string[] = [ "exceljs" ];
 	if ( gacha_config.qiniuOss.enable ) {
 		dependencies.push( "qiniu" );
+	}
+	if ( gacha_config.qrcode ) {
+		dependencies.push( "qrcode" );
 	}
 	const uninstall_dependencies: string[] = checkDependencies( file, ...dependencies );
 	for ( let uni_dep of uninstall_dependencies ) {
@@ -104,7 +117,7 @@ export async function init( { logger, file, renderer: botRender, refresh }: BOT 
 	createServer( port, logger );
 	return {
 		pluginName: "genshin_draw_analysis",
-		cfgList: [ draw_url, draw_analysis, draw_analysis_history, export_gacha_log, import_gacha_log ],
+		cfgList: [ draw_url, draw_analysis, draw_analysis_history, export_gacha_log, import_gacha_log, del_gacha_log ],
 		repo: {
 			owner: "wickedll",
 			repoName: "genshin_draw_analysis"
