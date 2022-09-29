@@ -18,7 +18,7 @@ async function import_from_json( file_url, { redis, sendMessage }: InputParamete
 				uid: info.uid
 			}
 			delete gacha_info['uigf_gacha_type'];
-			await redis.setHash( `genshin_draw_analysis_data-${ data.gacha_type }-${ info.uid }`, { [gacha_id]: JSON.stringify( gacha_info ) } );
+			await redis.setHash( `genshin_draw_analysis_data-${ data.uigf_gacha_type }-${ info.uid }`, { [gacha_id]: JSON.stringify( gacha_info ) } );
 		}
 		await sendMessage( `${ info.uid } 的 ${ list.length } 条抽卡记录数据已导入。` );
 	}

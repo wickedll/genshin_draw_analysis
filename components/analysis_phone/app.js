@@ -50,7 +50,7 @@ export default defineComponent( {
 				}
 				if ( item.rank_type === "5" && item.item_type === '武器' ) {
 					w5++;
-					arr5.push( { count, name: item.name, type: '武器' } );
+					arr5.push( { count, lang: item.lang, name: item.name, type: '武器' } );
 					total5 += count;
 					if ( !zo.count || zo.count > count ) {
 						zo = { count, name: item.name, type: '武器' }
@@ -62,7 +62,7 @@ export default defineComponent( {
 				if ( item.rank_type === "5" && item.item_type === '角色' ) {
 					j5++;
 					total5 += count;
-					arr5.push( { count, name: item.name, type: '角色' } );
+					arr5.push( { count, lang: item.lang, name: item.name, type: '角色' } );
 					if ( !zo.count || zo.count > count ) {
 						zo = { count, name: item.name, type: '角色' }
 					}
