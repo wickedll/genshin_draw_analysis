@@ -18,9 +18,15 @@ export default class GachaAnalysisConfig {
 			bucket: '',
 			domain: '',
 			folder: ""
-		}
+		},
+		qrcode: false
 	};
 	public qiniuOss: QiniuOssConfig;
+	
+	/**
+	 * 是否将链接转为二维码发送
+	 */
+	public qrcode: boolean;
 	
 	constructor( config: any ) {
 		this.qiniuOss = {
@@ -31,6 +37,7 @@ export default class GachaAnalysisConfig {
 			domain: config.qiniuOss.domain,
 			folder: config.qiniuOss.folder
 		}
+		this.qrcode = config.qrcode;
 	}
 	
 	public static create( file: FileManagement ): GachaAnalysisConfig {
@@ -69,10 +76,15 @@ export default class GachaAnalysisConfig {
 				domain: config.qiniuOss.domain,
 				folder: config.qiniuOss.folder
 			}
+			this.qrcode = config.qrcode;
+			
 			bot.logger.info( "开始检测插件需要的依赖是否已安装..." );
 			const dependencies: string[] = [];
 			if ( this.qiniuOss.enable ) {
 				dependencies.push( "qiniu" );
+			}
+			if ( this.qrcode ) {
+				dependencies.push( "qrcode" );
 			}
 			const uninstall_dependencies: string[] = checkDependencies( bot.file, ...dependencies );
 			for ( let uni_dep of uninstall_dependencies ) {

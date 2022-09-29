@@ -6,11 +6,6 @@ import { fakeIdFn } from "#genshin_draw_analysis/util/util";
 
 async function import_from_json( file_url, { redis, sendMessage }: InputParameter ): Promise<void> {
 	const response: Response = await fetch( file_url );
-	const content_type: string = response.headers.get( "Content-Type" ) || "";
-	if ( !content_type.includes( "application/json" ) ) {
-		await sendMessage( "你上传的不是 JSON 文件，请上传正确的文件。" );
-		return;
-	}
 	const { info, list }: Standard_Gacha = await response.json();
 	if ( list ) {
 		const func = fakeIdFn();
@@ -31,11 +26,6 @@ async function import_from_json( file_url, { redis, sendMessage }: InputParamete
 
 async function import_from_excel( file_url: string, { redis, sendMessage }: InputParameter ): Promise<void> {
 	const response: Response = await fetch( file_url );
-	const content_type: string = response.headers.get( "Content-Type" ) || "";
-	if ( !content_type.includes( "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ) ) {
-		await sendMessage( "你上传的不是可支持的 Excel 文件，请上传后缀为 xlsx 的 Excel文件。" );
-		return;
-	}
 	const buffer: ArrayBuffer = await response.arrayBuffer();
 	const ExcelJS = require( 'exceljs' );
 	const workbook = new ExcelJS.Workbook();
@@ -54,14 +44,14 @@ async function import_from_excel( file_url: string, { redis, sendMessage }: Inpu
 		headers.forEach( ( key, idx ) => {
 			if ( key === 'id' && !value[idx] ) {
 				gacha_info[key] = func();
-			} else if ( key !== 'uigf_gacha_type' ) {
-				gacha_info[key] = value[idx];
 			}
+			gacha_info[key] = value[idx];
 		} )
 		// @ts-ignore
-		const { gacha_type, uid, id } = gacha_info;
+		const { uigf_gacha_type, uid, id } = gacha_info;
+		delete gacha_info['uigf_gacha_type'];
 		import_uid = uid;
-		redis.setHash( `genshin_draw_analysis_data-${ gacha_type }-${ uid }`, { [id]: JSON.stringify( gacha_info ) } );
+		redis.setHash( `genshin_draw_analysis_data-${ uigf_gacha_type }-${ uid }`, { [id]: JSON.stringify( gacha_info ) } );
 	} );
 	
 	await sendMessage( `${ import_uid } 的 ${ sheetValues.length } 条抽卡记录数据已导入。` );
@@ -78,11 +68,16 @@ export async function main( bot: InputParameter ): Promise<void> {
 	const download_url: string = ( exec?.groups?.url || "" ).trim();
 	const import_type: string | undefined = exec?.groups?.import_type;
 	if ( download_url ) {
-		if ( import_type === 'json' ) {
-			await import_from_json( download_url, bot );
-		} else {
-			// excel
-			await import_from_excel( download_url, bot );
+		try {
+			if ( import_type === 'json' ) {
+				await import_from_json( download_url, bot );
+			} else {
+				// excel
+				await import_from_excel( download_url, bot );
+			}
+		} catch ( error ) {
+			logger.error( '数据导入出错', error );
+			await sendMessage( `数据导入出错! ${ <string>error }` );
 		}
 		return;
 	}
@@ -106,10 +101,15 @@ export async function main( bot: InputParameter ): Promise<void> {
 	}
 	
 	const { data: { url } }: FileElem = data.message[0];
-	if ( raw_message === 'json' ) {
-		await import_from_json( url, bot );
-	} else {
-		// excel
-		await import_from_excel( url, bot );
+	try {
+		if ( raw_message === 'json' ) {
+			await import_from_json( url, bot );
+		} else {
+			// excel
+			await import_from_excel( url, bot );
+		}
+	} catch ( error ) {
+		logger.error( '数据导入出错', error );
+		await sendMessage( `数据导入出错! ${ <string>error }` );
 	}
 }
