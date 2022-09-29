@@ -20,7 +20,11 @@ export default defineComponent( {
 		} );
 		const mainImage = computed( () => {
 			const type = props.data.type === "角色" ? "character" : "weapon";
-			const name = simplified( props.data.name );
+			const lang = props.data.lang;
+			let name = props.data.name;
+			if ( lang !== 'zh-cn' ) {
+				name = simplified( props.data.name );
+			}
 			return `https://adachi-bot.oss-cn-beijing.aliyuncs.com/Version2/thumb/${ type }/${ encodeURI( name ) }.png`;
 		} );
 		
