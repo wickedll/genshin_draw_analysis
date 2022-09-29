@@ -1,5 +1,5 @@
 @font-face {
-	font-family: XingKaiFont;
+	font-family: GachaFont;
 	src: url("../fonts/GachaFont.ttf");
 }
 
@@ -12,7 +12,7 @@
 	align-items: center;
 	flex-direction: column;
 	background-color: #f9f6f1;
-	font-family: XingKaiFont, Helvetica Neue, Helvetica, Arial, Microsoft Yahei, Hiragino Sans GB, Heiti SC, WenQuanYi Micro Hei, PingFang SC, HarmonyOS_Regular, sans-serif;
+	font-family: GachaFont, Helvetica Neue, Helvetica, Arial, Microsoft Yahei, Hiragino Sans GB, Heiti SC, WenQuanYi Micro Hei, PingFang SC, HarmonyOS_Regular, sans-serif;
 	padding-bottom: 150px;
 }
 
