@@ -92,12 +92,18 @@ export async function main(
 				"size": "5",
 				"end_id": 0,
 			}
+			let log_html_url: string;
 			if ( game_biz === 'hk4e_cn' ) {
+				log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha/index.html?";
 				url = "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?";
 			} else {
+				log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha/index.html?";
 				url = "https://hk4e-api-os.mihoyo.com/event/gacha_info/api/getGachaLog?";
 			}
-			url = url + obj2ParamsStr( params );
+			const paramsStr = obj2ParamsStr( params );
+			url += paramsStr;
+			log_html_url += paramsStr;
+			log_html_url = encodeURI( log_html_url ).replace( /\+/g, "%2B" ) + "#/log";
 			
 			// 校验URL
 			const tmp: string = encodeURI( url ).replace( /\+/g, "%2B" );
@@ -112,6 +118,9 @@ export async function main(
 				}
 				// 校验成功放入缓存，不需要频繁生成URL
 				await redis.setString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }`, tmp, 24 * 60 * 60 );
+				// 把生成的链接发给用户
+				await sendMessage( "抽卡记录链接已生成，有效时间24小时。" );
+				await sendMessage( log_html_url );
 			}
 		} catch ( e ) {
 			logger.error( <string>e );
