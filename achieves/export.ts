@@ -1,6 +1,7 @@
 import { InputParameter, Order } from "@modules/command";
 import {
 	Gacha_Info,
+	GachaUrl,
 	Standard_Gacha,
 	Standard_Gacha_Data,
 	Standard_Gacha_Excel,
@@ -14,8 +15,11 @@ import { isGroupMessage, isPrivateMessage } from "@modules/message";
 import {
 	convert2Lang,
 	convert2Readable,
+	generatorUrl,
 	get_sheet_name,
 	getColor,
+	getTimeOut,
+	secondToString,
 	upload2Qiniu
 } from "#genshin_draw_analysis/util/util";
 
@@ -24,6 +28,8 @@ import { gacha_config } from "#genshin_draw_analysis/init";
 import bot from "ROOT";
 import { ImgPttElem, segment, Sendable } from "oicq";
 import { Logger } from "log4js";
+import { Private } from "#genshin/module/private/main";
+import { getPrivateAccount } from "#genshin/utils/private";
 
 const gacha_types = [ "301", "400", "302", "100", "200" ];
 
@@ -329,14 +335,76 @@ async function export2Excel( {
 	}
 }
 
+async function export_gacha_url( user_id: number, sn: string, { redis, sendMessage, auth, logger }: InputParameter ) {
+	const key: string = `genshin_draw_analysis_html_url-${ user_id }.${ sn || "0" }`;
+	let url: string = await redis.getString( key );
+	if ( url ) {
+		await sendMessage( url );
+		const timeout: number = await getTimeOut( key );
+		const human_time: string = secondToString( timeout );
+		await sendMessage( `链接将在${ human_time }后过期。` );
+		return;
+	}
+	
+	let info: Private | string | undefined;
+	// 优先从抽卡分析的key中获取Cookie等信息
+	let { cookie, uid: game_uid, server, mysID } = await redis.getHash( `genshin_gacha.cookie.${ user_id }` );
+	if ( !cookie ) {
+		// 再从私人服务获取Cookie
+		info = await getPrivateAccount( user_id, sn, auth );
+		if ( typeof info === "string" ) {
+			await sendMessage( info );
+			return;
+		}
+		cookie = info.setting.cookie;
+		game_uid = info.setting.uid;
+		server = info.setting.server;
+		mysID = info.setting.mysID;
+	}
+	let gen_res: GachaUrl | undefined
+	try {
+		gen_res = await generatorUrl( cookie, game_uid, mysID, server );
+	} catch ( e ) {
+		logger.error( <string>e );
+		await sendMessage( <string>e );
+		return;
+	}
+	if ( gen_res ) {
+		const { api_log_url, log_html_url } = gen_res;
+		url = api_log_url;
+		// 更新ck
+		if ( info && info instanceof Private ) {
+			await info.replaceCookie( cookie );
+		} else {
+			await redis.setHashField( `genshin_gacha.cookie.${ user_id }`, "cookie", cookie );
+		}
+		// 校验成功放入缓存，不需要频繁生成URL
+		await redis.setString( `genshin_draw_analysis_url-${ user_id }.${ sn || "0" }`, url, 24 * 60 * 60 );
+		await redis.setString( `genshin_draw_analysis_html_url-${ user_id }.${ sn || "0" }`, log_html_url, 24 * 60 * 60 );
+		
+		await sendMessage( log_html_url );
+		await sendMessage( "链接将在24小时后过期。" );
+		return;
+	}
+}
+
 export async function main( bot: InputParameter ): Promise<void> {
 	const { sendMessage, messageData, redis } = bot;
+	const { user_id, raw_message } = messageData;
+	const reg = new RegExp( /(?<type>json|excel|url)(\s)*(?<sn>\d+)?/ );
+	const res: RegExpExecArray | null = reg.exec( raw_message );
+	const type: string = res?.groups?.type || "";
+	const sn: string = res?.groups?.sn || "";
+	if ( type === 'url' ) {
+		await export_gacha_url( user_id, sn, bot );
+		return;
+	}
+	
 	if ( !gacha_config.qiniuOss.enable && isPrivateMessage( messageData ) ) {
 		await sendMessage( '未启用 OSS 存储，暂不支持私聊导出文件' );
 		return;
 	}
 	
-	const { user_id, raw_message } = messageData;
 	const gacha_data_list: Standard_Gacha_Data[] = [];
 	// 获取存储的抽卡记录数据
 	const uid: string = await redis.getString( `genshin_draw_analysis_curr_uid-${ user_id }` );
