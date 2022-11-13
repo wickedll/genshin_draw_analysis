@@ -1,15 +1,13 @@
 import { InputParameter } from "@modules/command";
 import fetch from "node-fetch";
 import bot from "ROOT";
-import { cookie2Obj, getGameBiz, obj2ParamsStr, parseID, sleep } from "../util/util";
+import { generatorUrl, parseID, sleep } from "../util/util";
 import { RenderResult } from "@modules/renderer";
 import { pageFunction, renderer } from "../init";
 import { Sendable } from "oicq";
-import { generateAuthKey, getSToken, updatePoolId } from "#genshin_draw_analysis/util/api";
 import { Private } from "#genshin/module/private/main";
 import { getPrivateAccount } from "#genshin/utils/private";
-import { getRegion } from "#genshin/utils/region";
-import { AuthKey, GachaPoolInfo } from "#genshin_draw_analysis/util/types";
+import { GachaUrl } from "#genshin_draw_analysis/util/types";
 
 
 export async function analysisHandler( idMsg: string, userID: number, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<void> ) {
@@ -52,80 +50,26 @@ export async function main(
 			server = info.setting.server;
 			mysID = info.setting.mysID;
 		}
-		
+		let gen_res: GachaUrl | undefined
 		try {
-			const { login_ticket } = cookie2Obj( cookie );
-			if ( !login_ticket ) {
-				await sendMessage( 'cookie缺少login_ticket无法生成URL' );
-				return;
-			}
-			if ( !cookie.includes( "stuid" ) ) {
-				cookie = cookie + ";stuid=" + mysID;
-			}
-			if ( !cookie.includes( "login_uid" ) ) {
-				cookie = cookie + ";login_uid=" + mysID;
-			}
-			// 如果已有 stoken 就不需要再去请求新的，可以解决 login_ticket 经常过期的问题
-			if ( !cookie.includes( "stoken" ) ) {
-				const { list } = await getSToken( mysID, login_ticket, cookie );
-				const sToken: string = list[0].token;
-				cookie = cookie + ";stoken=" + sToken;
-			}
-			const { authkey, authkey_ver, sign_type }: AuthKey = await generateAuthKey( game_uid, server, cookie );
-			const { gacha_id, gacha_type }: GachaPoolInfo = await updatePoolId();
-			const game_biz: string = getGameBiz( game_uid[0] );
-			const params: object = {
-				"authkey_ver": authkey_ver,
-				"sign_type": sign_type,
-				"auth_appid": "webview_gacha",
-				"init_type": `${ gacha_type || "200" }`,
-				"gacha_id": `${ gacha_id || "3c9dbe90839b4482907f14f08321b6fed9d7de11" }`,
-				"timestamp": ( Date.now() / 1000 | 0 ).toString( 10 ),
-				"lang": "zh-cn",
-				"device_type": "mobile",
-				"plat_type": "android",
-				"region": getRegion( game_uid[0] ),
-				"authkey": authkey,
-				"game_biz": game_biz,
-				"gacha_type": "301",
-				"page": "1",
-				"size": "5",
-				"end_id": 0,
-			}
-			let log_html_url: string;
-			if ( game_biz === 'hk4e_cn' ) {
-				log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha/index.html?";
-				url = "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?";
-			} else {
-				log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha/index.html?";
-				url = "https://hk4e-api-os.mihoyo.com/event/gacha_info/api/getGachaLog?";
-			}
-			const paramsStr = obj2ParamsStr( params );
-			url += paramsStr;
-			log_html_url += paramsStr;
-			log_html_url = encodeURI( log_html_url ).replace( /\+/g, "%2B" ) + "#/log";
-			
-			// 校验URL
-			const tmp: string = encodeURI( url ).replace( /\+/g, "%2B" );
-			let response = await fetch( tmp, { method: "GET" } );
-			let data = await response.json();
-			if ( data.retcode === 0 ) {
-				// 更新ck
-				if ( info && info instanceof Private ) {
-					await info.replaceCookie( cookie );
-				} else {
-					await redis.setHashField( `genshin_gacha.cookie.${ userID }`, "cookie", cookie );
-				}
-				// 校验成功放入缓存，不需要频繁生成URL
-				await redis.setString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }`, tmp, 24 * 60 * 60 );
-				// 把生成的链接发给用户
-				await sendMessage( "抽卡记录链接已生成，有效时间24小时。" );
-				await sendMessage( log_html_url );
-			}
+			gen_res = await generatorUrl( cookie, game_uid, mysID, server );
 		} catch ( e ) {
 			logger.error( <string>e );
 			await sendMessage( <string>e );
 			return;
+		}
+		if ( gen_res ) {
+			const { api_log_url, log_html_url } = gen_res;
+			url = api_log_url;
+			// 更新ck
+			if ( info && info instanceof Private ) {
+				await info.replaceCookie( cookie );
+			} else {
+				await redis.setHashField( `genshin_gacha.cookie.${ userID }`, "cookie", cookie );
+			}
+			// 校验成功放入缓存，不需要频繁生成URL
+			await redis.setString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }`, url, 24 * 60 * 60 );
+			await redis.setString( `genshin_draw_analysis_html_url-${ userID }.${ sn || "0" }`, log_html_url, 24 * 60 * 60 );
 		}
 	}
 	

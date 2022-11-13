@@ -1,9 +1,13 @@
 import { randomString } from "#genshin/utils/random";
 import { Md5 } from "md5-typescript";
-import { FakeIdFunc, QiniuOssConfig } from "#genshin_draw_analysis/util/types";
+import { AuthKey, FakeIdFunc, GachaPoolInfo, GachaUrl, QiniuOssConfig } from "#genshin_draw_analysis/util/types";
 import Database from "@modules/database";
 import { exec } from "child_process";
 import FileManagement from "@modules/file";
+import { generateAuthKey, getSToken, updatePoolId } from "#genshin_draw_analysis/util/api";
+import { getRegion } from "#genshin/utils/region";
+import fetch from "node-fetch";
+import bot from "ROOT";
 
 async function sleep( ms: number ): Promise<void> {
 	return new Promise( resolve => setTimeout( resolve, ms ) );
@@ -176,6 +180,91 @@ export function checkDependencies( file: FileManagement, ...dependencies ): stri
 	// 过滤出未安装的依赖
 	const keys: string[] = Object.keys( dep );
 	return dependencies.filter( dependency => !keys.includes( dependency ) );
+}
+
+export async function generatorUrl( cookie: string, game_uid: string, mysID: number, server: string ): Promise<GachaUrl | undefined> {
+	let url: string;
+	const { login_ticket } = cookie2Obj( cookie );
+	if ( !login_ticket ) {
+		throw "cookie缺少login_ticket无法生成URL";
+	}
+	if ( !cookie.includes( "stuid" ) ) {
+		cookie = cookie + ";stuid=" + mysID;
+	}
+	if ( !cookie.includes( "login_uid" ) ) {
+		cookie = cookie + ";login_uid=" + mysID;
+	}
+	// 如果已有 stoken 就不需要再去请求新的，可以解决 login_ticket 经常过期的问题
+	if ( !cookie.includes( "stoken" ) ) {
+		const { list } = await getSToken( mysID, login_ticket, cookie );
+		const sToken: string = list[0].token;
+		cookie = cookie + ";stoken=" + sToken;
+	}
+	const { authkey, authkey_ver, sign_type }: AuthKey = await generateAuthKey( game_uid, server, cookie );
+	const { gacha_id, gacha_type }: GachaPoolInfo = await updatePoolId();
+	const game_biz: string = getGameBiz( game_uid[0] );
+	const params: object = {
+		"authkey_ver": authkey_ver,
+		"sign_type": sign_type,
+		"auth_appid": "webview_gacha",
+		"init_type": `${ gacha_type || "200" }`,
+		"gacha_id": `${ gacha_id || "3c9dbe90839b4482907f14f08321b6fed9d7de11" }`,
+		"timestamp": ( Date.now() / 1000 | 0 ).toString( 10 ),
+		"lang": "zh-cn",
+		"device_type": "mobile",
+		"plat_type": "android",
+		"region": getRegion( game_uid[0] ),
+		"authkey": authkey,
+		"game_biz": game_biz,
+		"gacha_type": "301",
+		"page": "1",
+		"size": "5",
+		"end_id": 0,
+	}
+	let log_html_url: string;
+	if ( game_biz === 'hk4e_cn' ) {
+		log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha/index.html?";
+		url = "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?";
+	} else {
+		log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha/index.html?";
+		url = "https://hk4e-api-os.mihoyo.com/event/gacha_info/api/getGachaLog?";
+	}
+	const paramsStr = obj2ParamsStr( params );
+	url += paramsStr;
+	log_html_url += paramsStr;
+	log_html_url = encodeURI( log_html_url ).replace( /\+/g, "%2B" ) + "#/log";
+	
+	// 校验URL
+	const tmp: string = encodeURI( url ).replace( /\+/g, "%2B" );
+	let response = await fetch( tmp, { method: "GET" } );
+	let data = await response.json();
+	if ( data.retcode === 0 ) {
+		return {
+			api_log_url: tmp,
+			log_html_url
+		}
+	} else {
+		throw `抽卡链接生成失败: ${ data.message }`;
+	}
+}
+
+export async function getTimeOut( key: string ): Promise<number> {
+	return new Promise( ( resolve, reject ) => {
+		bot.redis.client.ttl( key, ( error: Error | null, data: number | null ) => {
+			if ( error !== null ) {
+				reject( error );
+			} else {
+				resolve( data || -2 );
+			}
+		} );
+	} );
+}
+
+export function secondToString( ttl: number ): string {
+	const hour = Math.floor( ttl / 3600 );
+	const minute = Math.floor( ( ttl - hour * 3600 ) / 60 );
+	const second = ttl % 60;
+	return `${ hour } 时 ${ minute } 分 ${ second } 秒`;
 }
 
 export { sleep, parseID, generateDS };

@@ -61,10 +61,10 @@ const draw_analysis_history: OrderConfig = {
 const export_gacha_log: OrderConfig = {
 	type: "order",
 	cmdKey: "genshin.draw.analysis.export_gacha_log",
-	desc: [ "导出抽卡记录", "[json|excel]" ],
+	desc: [ "导出抽卡记录", "[json|excel|url (序号)]" ],
 	headers: [ "export" ],
-	regexps: [ "(json|excel)" ],
-	detail: "导出抽卡记录，目前支持json、excel。",
+	regexps: [ "(json|excel|(url\\s*(\\d+)?))" ],
+	detail: "导出抽卡记录，目前支持json、excel、url，导出链接时可以使用私人服务序号以使用私人服务CK生成链接。",
 	main: "achieves/export"
 };
 

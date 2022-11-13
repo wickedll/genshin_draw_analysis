@@ -88,3 +88,12 @@ export interface QiniuOssConfig {
 	// 上传后的目录
 	folder: string;
 }
+
+/**
+ * @api_log_url 接口地址
+ * @log_html_url 网页地址（抽卡分析通用URL）
+ */
+export interface GachaUrl {
+	api_log_url: string;
+	log_html_url: string;
+}
