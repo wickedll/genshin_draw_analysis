@@ -93,7 +93,7 @@ async function export2JSON( export_data: Standard_Gacha, {
 	const opened: number = fs.openSync( export_json_path, "w" );
 	fs.writeSync( opened, json );
 	fs.closeSync( opened );
-	if ( gacha_config.qiniuOss.enable ) {
+	if ( gacha_config.qiniuOss.enable || gacha_config.qiniuOss.uses3 ) {
 		try {
 			// 上传到 OSS
 			const url: string = await upload2Qiniu( export_json_path, file_name, gacha_config.qiniuOss, redis );
@@ -309,7 +309,7 @@ async function export2Excel( {
 	const export_excel_path = resolve( tmp_path, file_name );
 	await workbook.xlsx.writeFile( export_excel_path );
 	
-	if ( gacha_config.qiniuOss.enable ) {
+	if ( gacha_config.qiniuOss.enable || gacha_config.qiniuOss.uses3 ) {
 		// 上传到 OSS
 		try {
 			const url: string = await upload2Qiniu( export_excel_path, file_name, gacha_config.qiniuOss, redis );
@@ -400,7 +400,7 @@ export async function main( bot: InputParameter ): Promise<void> {
 		return;
 	}
 	
-	if ( !gacha_config.qiniuOss.enable && isPrivateMessage( messageData ) ) {
+	if ( !( gacha_config.qiniuOss.enable || gacha_config.qiniuOss.uses3 ) && isPrivateMessage( messageData ) ) {
 		await sendMessage( '未启用 OSS 存储，暂不支持私聊导出文件' );
 		return;
 	}

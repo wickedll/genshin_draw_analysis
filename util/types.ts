@@ -87,6 +87,9 @@ export interface QiniuOssConfig {
 	domain: string;
 	// 上传后的目录
 	folder: string;
+	uses3: boolean;
+	s3endpoint: string;
+	s3region: string;
 }
 
 /**

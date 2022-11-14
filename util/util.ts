@@ -8,6 +8,7 @@ import { generateAuthKey, getSToken, updatePoolId } from "#genshin_draw_analysis
 import { getRegion } from "#genshin/utils/region";
 import fetch from "node-fetch";
 import bot from "ROOT";
+import { createReadStream } from "fs";
 
 async function sleep( ms: number ): Promise<void> {
 	return new Promise( resolve => setTimeout( resolve, ms ) );
@@ -123,6 +124,34 @@ export function getColor( rank_type: string ): string {
 }
 
 export async function upload2Qiniu( file_path: string, file_name: string, qiniu_config: QiniuOssConfig, redis: Database ): Promise<string> {
+	if ( !qiniu_config.enable && qiniu_config.uses3 ) {
+		const { S3Client, PutObjectCommand } = require( "@aws-sdk/client-s3" );
+		// Create an Amazon S3 service client object.
+		const s3Client = new S3Client( {
+			region: qiniu_config.s3region, endpoint: `https://${ qiniu_config.s3endpoint }`,
+			credentials: {
+				accessKeyId: qiniu_config.accessKey,
+				secretAccessKey: qiniu_config.secretKey
+			}
+		} );
+		
+		// Set the parameters
+		const params = {
+			Bucket: qiniu_config.bucket,
+			Key: `${ qiniu_config.folder }/${ file_name }`,
+			Body: createReadStream( file_path )
+		};
+		
+		// Create an object and upload it to the Amazon S3 bucket.
+		return new Promise( ( resolve, reject ) => {
+			s3Client.send( new PutObjectCommand( params ) ).then( () => {
+				resolve( `${ qiniu_config.domain }${ params.Key }?attname=${ file_name }` );
+			} ).catch( reason => {
+				reject( reason );
+			} );
+		} )
+	}
+	
 	const {
 		form_up: { FormUploader },
 		auth: { digest },
