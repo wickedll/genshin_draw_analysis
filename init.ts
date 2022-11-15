@@ -96,6 +96,8 @@ export async function init( { logger, file, renderer: botRender, refresh }: BOT 
 	const dependencies: string[] = [ "exceljs" ];
 	if ( gacha_config.qiniuOss.enable ) {
 		dependencies.push( "qiniu" );
+	} else if ( gacha_config.qiniuOss.uses3 ) {
+		dependencies.push( "@aws-sdk/client-s3" );
 	}
 	if ( gacha_config.qrcode ) {
 		dependencies.push( "qrcode" );
@@ -121,6 +123,7 @@ export async function init( { logger, file, renderer: botRender, refresh }: BOT 
 		repo: {
 			owner: "wickedll",
 			repoName: "genshin_draw_analysis"
-		}
+		},
+		aliases: []
 	};
 }
