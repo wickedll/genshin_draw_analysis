@@ -99,4 +99,5 @@ export interface QiniuOssConfig {
 export interface GachaUrl {
 	api_log_url: string;
 	log_html_url: string;
+	cookie?: string;
 }

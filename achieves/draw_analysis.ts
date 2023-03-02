@@ -59,13 +59,15 @@ export async function main(
 			return;
 		}
 		if ( gen_res ) {
-			const { api_log_url, log_html_url } = gen_res;
+			const { api_log_url, log_html_url, cookie: new_cookie } = gen_res;
 			url = api_log_url;
 			// 更新ck
-			if ( info && info instanceof Private ) {
-				await info.replaceCookie( cookie );
-			} else {
-				await redis.setHashField( `genshin_gacha.cookie.${ userID }`, "cookie", cookie );
+			if ( new_cookie ) {
+				if ( info && info instanceof Private ) {
+					await info.replaceCookie( new_cookie );
+				} else {
+					await redis.setHashField( `genshin_gacha.cookie.${ userID }`, "cookie", new_cookie );
+				}
 			}
 			// 校验成功放入缓存，不需要频繁生成URL
 			await redis.setString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }`, url, 24 * 60 * 60 );

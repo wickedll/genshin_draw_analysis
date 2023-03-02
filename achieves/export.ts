@@ -73,12 +73,12 @@ async function export2JSON( export_data: Standard_Gacha, {
 		return;
 	}
 	export_data.list.sort( ( a, b ) => {
-		const n1 = BigInt( a.id || "0" );
-		const n2 = BigInt( b.id || "0" );
-		if ( n1 > n2 ) {
+		const a_time = new Date( a.time ).getTime();
+		const b_time = new Date( b.time ).getTime();
+		if ( a_time > b_time ) {
 			return 1;
-		} else if ( n1 === n2 ) {
-			return 0;
+		} else if ( a_time === b_time ) {
+			return a.id!.localeCompare( b.id! );
 		} else {
 			return -1;
 		}
@@ -188,12 +188,12 @@ async function export2Excel( {
 	}
 	// 按照 ID 升序排列
 	list = list.sort( ( a, b ) => {
-		const n1 = BigInt( a.id || "0" );
-		const n2 = BigInt( b.id || "0" );
-		if ( n1 > n2 ) {
+		const a_time = new Date( a.time ).getTime();
+		const b_time = new Date( b.time ).getTime();
+		if ( a_time > b_time ) {
 			return 1;
-		} else if ( n1 === n2 ) {
-			return 0;
+		} else if ( a_time === b_time ) {
+			return a.id!.localeCompare( b.id! );
 		} else {
 			return -1;
 		}
@@ -433,11 +433,11 @@ export async function main( bot: InputParameter ): Promise<void> {
 	const info: Standard_Gacha_Info = {
 		uid,
 		lang,
-		export_app: '-',
+		export_app: 'Adachi-BOT',
 		export_app_version: '1.0.0',
 		export_time: moment().format( "yy-MM-DD HH:mm:ss" ),
 		export_timestamp: Date.now() / 1000 | 0,
-		uigf_version: '2.2'
+		uigf_version: 'v2.2'
 	}
 	const export_data: Standard_Gacha = {
 		info,
