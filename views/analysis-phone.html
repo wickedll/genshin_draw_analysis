@@ -40,8 +40,15 @@
 	}
 
 	function sortData(a, b) {
-		let result = BigInt(a.id) - BigInt(b.id);
-		return result > 0 ? 1 : result === 0n ? 0 : -1;
+		const a_time = new Date(a.time).getTime();
+		const b_time = new Date(b.time).getTime();
+		if (a_time > b_time) {
+			return 1;
+		} else if (a_time === b_time) {
+			return a.id.localeCompare(b.id);
+		} else {
+			return -1;
+		}
 	}
 </script>
 

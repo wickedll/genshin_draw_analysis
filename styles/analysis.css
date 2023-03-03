@@ -74,12 +74,17 @@
     color: rgba(0,0,0,0.6);
     word-wrap: break-word;
 }
-.jl2{
-    color: #fac858;
+
+.jl2 {
+	color: #fac858;
 }
 
-.time{
-    font-size: 14px;
-    color: rgba(0,0,0,0.6);
-    font-weight: bolder;
+.time {
+	font-size: 14px;
+	color: rgba(0, 0, 0, 0.6);
+	font-weight: bolder;
+}
+
+.tips {
+	margin: 100px 0;
 }

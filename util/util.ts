@@ -84,7 +84,13 @@ const header_zh_cn = {
 	gacha_type: '祈愿类型'
 }
 
-const gacha_types_zh_cn = { "301": "角色活动祈愿", "400": "角色活动祈愿-2", "302": "武器活动祈愿", "200": "常驻祈愿", "100": "新手祈愿" };
+const gacha_types_zh_cn = {
+	"301": "角色活动祈愿",
+	"400": "角色活动祈愿-2",
+	"302": "武器活动祈愿",
+	"200": "常驻祈愿",
+	"100": "新手祈愿"
+};
 const gacha_types_en_us = {
 	"301": "Character Event Wish",
 	"400": "Character Event Wish-2",
@@ -213,21 +219,23 @@ export function checkDependencies( file: FileManagement, ...dependencies ): stri
 
 export async function generatorUrl( cookie: string, game_uid: string, mysID: number, server: string ): Promise<GachaUrl | undefined> {
 	let url: string;
-	const { login_ticket } = cookie2Obj( cookie );
-	if ( !login_ticket ) {
-		throw "cookie缺少login_ticket无法生成URL";
-	}
-	if ( !cookie.includes( "stuid" ) ) {
-		cookie = cookie + ";stuid=" + mysID;
-	}
-	if ( !cookie.includes( "login_uid" ) ) {
-		cookie = cookie + ";login_uid=" + mysID;
-	}
+	let flag: boolean = false;
 	// 如果已有 stoken 就不需要再去请求新的，可以解决 login_ticket 经常过期的问题
 	if ( !cookie.includes( "stoken" ) ) {
+		const { login_ticket } = cookie2Obj( cookie );
+		if ( !login_ticket ) {
+			throw "cookie缺少login_ticket无法生成URL";
+		}
+		if ( !cookie.includes( "stuid" ) ) {
+			cookie = cookie + ";stuid=" + mysID;
+		}
+		if ( !cookie.includes( "login_uid" ) ) {
+			cookie = cookie + ";login_uid=" + mysID;
+		}
 		const { list } = await getSToken( mysID, login_ticket, cookie );
 		const sToken: string = list[0].token;
 		cookie = cookie + ";stoken=" + sToken;
+		flag = true;
 	}
 	const { authkey, authkey_ver, sign_type }: AuthKey = await generateAuthKey( game_uid, server, cookie );
 	const { gacha_id, gacha_type }: GachaPoolInfo = await updatePoolId();
@@ -270,7 +278,8 @@ export async function generatorUrl( cookie: string, game_uid: string, mysID: num
 	if ( data.retcode === 0 ) {
 		return {
 			api_log_url: tmp,
-			log_html_url
+			log_html_url,
+			cookie: flag ? cookie : undefined
 		}
 	} else {
 		throw `抽卡链接生成失败: ${ data.message }`;

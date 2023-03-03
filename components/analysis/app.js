@@ -2,7 +2,7 @@ const template =
 	`<div class="main2">
 	<span class="header">UID{{uid}}的抽卡记录分析</span>
 	<div class="main">
-		<div class="item">
+		<div class="item" v-show="info['301'].total > 0">
 			<span class="title">角色活动祈愿</span>
 			<div id="up-role" style="width:400px;height:400px;"></div>
 			<span class="time">{{info["301"].time}}</span>
@@ -20,7 +20,7 @@ const template =
 				<span class="total">5星平均出货次数为：<span class="per">{{info["301"].per}}</span></span>
 			</div>
 		</div>
-		<div class="item">
+		<div class="item" v-show="info['302'].total > 0">
 			<span class="title">武器活动祈愿</span>
 			<div id="up-arms" style="width:400px;height:400px;"></div>
 			<span class="time">{{info["302"].time}}</span>
@@ -38,7 +38,7 @@ const template =
 				<span class="total">5星平均出货次数为：<span class="per">{{info["302"].per}}</span></span>
 			</div>
 		</div>
-		<div class="item">
+		<div class="item" v-show="info['200'].total > 0">
 			<span class="title">常驻祈愿</span>
 			<div id="permanent" style="width:400px;height:400px;"></div>
 			<span class="time">{{info["200"].time}}</span>
@@ -57,7 +57,7 @@ const template =
 			</div>
 			
 		</div>
-		<div class="item">
+		<div class="item" v-show="info['100'].total > 0">
 			<span class="title">新手祈愿</span>
 			<div id="novice" style="width:400px;height:400px;"></div>
 			<span class="time">{{info["100"].time}}</span>
@@ -75,6 +75,7 @@ const template =
 				<span class="total">5星平均出货次数为：<span class="per">{{info["100"].per}}</span></span>
 			</div>
 		</div>
+		<div class="tips" v-show="info['301'].total === 0 && info['302'].total === 0 && info['200'].total === 0 && info['100'].total === 0">您无抽卡记录，或者抽卡记录已全部过期。</div>
 	</div>
 	<div class="footer">Create by lishengqunchn © lishengqun.com</div>
 </div>`;
