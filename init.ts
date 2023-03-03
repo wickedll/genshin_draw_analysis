@@ -124,6 +124,6 @@ export async function init( { logger, file, renderer: botRender, refresh }: BOT 
 			owner: "wickedll",
 			repoName: "genshin_draw_analysis"
 		},
-		aliases: []
+		aliases: gacha_config.aliases
 	};
 }
