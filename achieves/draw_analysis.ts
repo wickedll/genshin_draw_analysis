@@ -45,7 +45,7 @@ export async function main(
 				await sendMessage( info );
 				return;
 			}
-			cookie = info.setting.cookie;
+			cookie = info.setting.stoken;
 			game_uid = info.setting.uid;
 			server = info.setting.server;
 			mysID = info.setting.mysID;
