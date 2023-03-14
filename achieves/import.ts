@@ -1,8 +1,9 @@
 import { InputParameter } from "@modules/command";
 import fetch from "node-fetch";
-import { FileElem, GroupMessageEventData, PrivateMessageEventData, ReplyElem, Ret, TextElem } from "oicq";
 import { Gacha_Info, Standard_Gacha } from "#genshin_draw_analysis/util/types";
 import { fakeIdFn } from "#genshin_draw_analysis/util/util";
+import { isPrivateMessage } from "@modules/message";
+import { Group, GroupMessage, MessageElem, PrivateMessage, User } from "icqq";
 
 async function import_from_json( file_url, { redis, sendMessage }: InputParameter ): Promise<void> {
 	const response: Response = await fetch( file_url );
@@ -59,12 +60,9 @@ async function import_from_excel( file_url: string, { redis, sendMessage }: Inpu
 
 export async function main( bot: InputParameter ): Promise<void> {
 	const { sendMessage, messageData, client, logger } = bot;
-	const { message, raw_message } = messageData;
-	// 从原始信息中获取值，raw_message 已被修改为纯小写，匹配到的链接可能会404
-	const textElem: TextElem = <TextElem>message.filter( msg => msg.type === 'text' )[0];
-	const origin_message: string = textElem.data.text;
+	const { raw_message, source } = messageData;
 	const reg = new RegExp( /(?<import_type>json|excel)\s*(?<url>https?:\/\/(?:www\.)?[-a-zA-Z\d@:%._+~#=]{1,256}\.[a-zA-Z\d()]{1,6}\b[-a-zA-Z\d()!@:%_+.~#?&/=]*)?/ );
-	const exec: RegExpExecArray | null = reg.exec( origin_message );
+	const exec: RegExpExecArray | null = reg.exec( raw_message );
 	const download_url: string = ( exec?.groups?.url || "" ).trim();
 	const import_type: string | undefined = exec?.groups?.import_type;
 	if ( download_url ) {
@@ -82,25 +80,27 @@ export async function main( bot: InputParameter ): Promise<void> {
 		return;
 	}
 	
-	const filter = message.filter( msg => msg.type === 'reply' );
-	if ( !filter || filter.length === 0 ) {
+	if ( !source ) {
 		await sendMessage( "请回复你上传文件的那条消息的同时使用该指令。" )
 		return;
 	}
-	const { data: { id } }: ReplyElem = <ReplyElem>filter[0]
-	const { retcode, error, data }: Ret<PrivateMessageEventData | GroupMessageEventData> = await client.getMsg( id );
-	if ( retcode !== 0 ) {
-		logger.error( "获取引用消息失败:", error );
-		await sendMessage( "获取引用消息失败, " + error?.message );
+	
+	let url: string;
+	const unit: Group | User = isPrivateMessage( messageData ) ? client.pickUser( source.user_id ) : client.pickGroup( messageData.group_id );
+	const t = await unit.getChatHistory();
+	const time: number = isPrivateMessage( messageData ) ? source.time + 10 : source.seq;
+	const chatHistory: PrivateMessage[] | GroupMessage[] = await unit.getChatHistory( time, 1 );
+	if ( chatHistory.length === 0 ) {
+		await sendMessage( "未获取到要导入的文件，或可尝试使用文件链接导入。" );
+		return;
+	}
+	const replyMessage: MessageElem = chatHistory[0].message[0];
+	if ( replyMessage.type !== "file" ) {
+		await sendMessage( "未获取到要导入的文件，或可尝试使用文件链接导入。" );
 		return;
 	}
 	
-	if ( data?.message[0].type !== 'file' ) {
-		await sendMessage( "请回复你上传的文件的那条消息，否则无法识别你要导入的文件。" );
-		return;
-	}
-	
-	const { data: { url } }: FileElem = data.message[0];
+	url = await unit.getFileUrl( replyMessage.fid );
 	try {
 		if ( raw_message === 'json' ) {
 			await import_from_json( url, bot );

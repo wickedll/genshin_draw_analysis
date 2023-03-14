@@ -4,13 +4,13 @@ import bot from "ROOT";
 import { generatorUrl, parseID, sleep } from "../util/util";
 import { RenderResult } from "@modules/renderer";
 import { pageFunction, renderer } from "../init";
-import { Sendable } from "oicq";
+import { MessageRet, segment, Sendable } from "icqq";
 import { Private } from "#genshin/module/private/main";
 import { getPrivateAccount } from "#genshin/utils/private";
 import { GachaUrl } from "#genshin_draw_analysis/util/types";
 
 
-export async function analysisHandler( idMsg: string, userID: number, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<void> ) {
+export async function analysisHandler( idMsg: string, userID: number, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<MessageRet> ) {
 	let id = parseID( idMsg );
 	const res: RenderResult = await renderer.asForFunction(
 		id === 1 ? "/analysis-phone.html" : "/analysis.html",
@@ -18,7 +18,7 @@ export async function analysisHandler( idMsg: string, userID: number, sendMessag
 		{ qq: userID }
 	);
 	if ( res.code === "ok" ) {
-		await sendMessage( res.data );
+		await sendMessage( segment.image( <string>res.data ) );
 	} else {
 		bot.logger.error( res.error );
 		await sendMessage( "图片渲染异常，请联系持有者进行反馈" );
@@ -29,49 +29,57 @@ export async function main(
 	{ sendMessage, messageData, redis, auth, logger }: InputParameter
 ): Promise<void> {
 	const { user_id: userID, raw_message } = messageData;
-	const reg = new RegExp( /(?<sn>\d+)?(\s)*(?<style>\d+)?/ );
-	const res: RegExpExecArray | null = reg.exec( raw_message );
-	const style: string = res?.groups?.style || "";
-	const sn: string = res?.groups?.sn || "";
-	let url = await redis.getString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }` );
-	if ( !url || url.indexOf( "http" ) <= -1 ) {
-		let info: Private | string | undefined;
-		// 优先从抽卡分析的key中获取Cookie等信息
-		let { cookie, uid: game_uid, server, mysID } = await redis.getHash( `genshin_gacha.cookie.${ userID }` );
-		if ( !cookie ) {
-			// 再从私人服务获取Cookie
+	let url = 'https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?';
+	let style: string = "";
+	let sn: string = "";
+	// 链接方式
+	if ( raw_message.startsWith( "https://" ) ) {
+		try {
+			if ( raw_message.indexOf( "getGachaLog?" ) > -1 ) {
+				url += raw_message.split( 'getGachaLog?' )[1].split( '&amp;game_biz=hk4e_cn' )[0];
+			} else {
+				url += raw_message.split( 'index.html?' )[1].split( '&amp;game_biz=hk4e_cn' )[0];
+			}
+			await redis.setString( `genshin_draw_analysis_url-${ userID }.0`, url, 24 * 60 * 60 );
+		} catch ( error ) {
+			await sendMessage( "URL输入错误！" );
+			return;
+		}
+	} else {
+		// Cookie方式
+		const reg = new RegExp( /(?<sn>\d+)?(\s)*(?<style>\d+)?/ );
+		const res: RegExpExecArray | null = reg.exec( raw_message );
+		style = res?.groups?.style || "";
+		sn = res?.groups?.sn || "";
+		url = await redis.getString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }` );
+		if ( !url || url.indexOf( "http" ) <= -1 ) {
+			let info: Private | string | undefined;
+			// 从私人服务获取Cookie
 			info = await getPrivateAccount( userID, sn, auth );
 			if ( typeof info === "string" ) {
 				await sendMessage( info );
 				return;
 			}
-			cookie = info.setting.stoken;
-			game_uid = info.setting.uid;
-			server = info.setting.server;
-			mysID = info.setting.mysID;
-		}
-		let gen_res: GachaUrl | undefined
-		try {
-			gen_res = await generatorUrl( cookie, game_uid, mysID, server );
-		} catch ( e ) {
-			logger.error( <string>e );
-			await sendMessage( <string>e );
-			return;
-		}
-		if ( gen_res ) {
-			const { api_log_url, log_html_url, cookie: new_cookie } = gen_res;
-			url = api_log_url;
-			// 更新ck
-			if ( new_cookie ) {
-				if ( info && info instanceof Private ) {
-					await info.replaceCookie( new_cookie );
-				} else {
-					await redis.setHashField( `genshin_gacha.cookie.${ userID }`, "cookie", new_cookie );
-				}
+			let gen_res: GachaUrl | undefined;
+			try {
+				logger.debug( `UID: {${ info.setting.uid }, Cookie: ${ info.setting.stoken }` );
+				gen_res = await generatorUrl( info.setting.stoken, info.setting.uid, info.setting.mysID, info.setting.server );
+			} catch ( e ) {
+				logger.error( <string>e );
+				await sendMessage( <string>e );
+				return;
 			}
-			// 校验成功放入缓存，不需要频繁生成URL
-			await redis.setString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }`, url, 24 * 60 * 60 );
-			await redis.setString( `genshin_draw_analysis_html_url-${ userID }.${ sn || "0" }`, log_html_url, 24 * 60 * 60 );
+			if ( gen_res ) {
+				const { api_log_url, log_html_url, cookie } = gen_res;
+				url = api_log_url;
+				// 更新ck
+				if ( cookie ) {
+					await info.replaceCookie( cookie );
+				}
+				// 校验成功放入缓存，不需要频繁生成URL
+				await redis.setString( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }`, url, 24 * 60 * 60 );
+				await redis.setString( `genshin_draw_analysis_html_url-${ userID }.${ sn || "0" }`, log_html_url, 24 * 60 * 60 );
+			}
 		}
 	}
 	
@@ -110,7 +118,7 @@ export async function main(
 				data = await response.json();
 			}
 			if ( data.retcode === -101 ) {
-				await redis.deleteKey( `genshin_draw_analysis_url-${ userID }` );
+				await redis.deleteKey( `genshin_draw_analysis_url-${ userID }.${ sn || "0" }`, `genshin_draw_analysis_html_url-${ userID }.${ sn || "0" }` );
 				await sendMessage( 'AuthKey 已过期，缓存链接已删除，请重试!' );
 				return;
 			}
@@ -138,6 +146,7 @@ export async function main(
 		} while ( length === size );
 	}
 	
+	logger.debug( `CURRENT UID: ${ uid }` );
 	if ( uid !== '' ) {
 		await redis.setString( `genshin_draw_analysis_curr_uid-${ userID }`, uid );
 	}

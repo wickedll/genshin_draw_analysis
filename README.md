@@ -8,13 +8,11 @@
 
 以下示例为默认指令头。
 
-- `#su`: 设置抽卡分析链接或者米游社通行证 `Cookie` (`Cookie` 的作用是自动生成抽卡链接，如果没有通过此指令设置 `Cookie`
-  将会使用你私人服务中的 `Cookie`，具体使用可使用 `#detial`
-  指令查看。 )
-    - 链接获取方式参考[此教程](https://mp.weixin.qq.com/s/WcH6DgBRoAwbnmOlGTJBNg)
-    - `Cookie` 是米游社的通行证页面的 `Cookie`，建议浏览器无痕模式访问 [米哈游通行证](https://user.mihoyo.com/)
-      ，登录个人通行证账号后 `F12` 在 `Console`
-      或者控制台栏里输入 `document.cookie` 回车获取。或者在新建书签，在书签的网址处填写下面的代码。
+- 链接获取方式参考[此教程](https://mp.weixin.qq.com/s/WcH6DgBRoAwbnmOlGTJBNg)
+- `Cookie` 是米游社的通行证页面的 `Cookie`，建议浏览器无痕模式访问 [米哈游通行证](https://user.mihoyo.com/)
+  ，登录个人通行证账号后 `F12` 在 `Console` 或者控制台栏里输入 `document.cookie` 回车获取。或者在新建书签，在书签的网址处填写下面的代码。
+- `Cookie` 也可以参考[胡桃工具箱](https://hut.ao/advanced/get-stoken-cookie-from-the-third-party.html)
+  的这篇文章直接获取带有 `Stoken` 的 `Cookie`。
 
 ```js
 javascript:(function () {
@@ -33,8 +31,9 @@ javascript:(function () {
 })();
 ```
 
-- `#da`: 分析抽卡记录，可选参数为 `私人服务序号` 和 `样式`，比如：`#da 1 2` 即使用私人服务1号的 `Cookie` 和
-  第2种样式（PC样式）生成分析图，具体使用可使用 `#detial` 指令查看。
+- `#da`: 分析抽卡记录，可选参数为 `私人服务序号` 和 `样式`以及`抽卡记录链接`，比如：`#da 1 2` 即使用私人服务1号的 `Cookie`
+  和
+  第2种样式（饼图样式）生成分析图，具体使用可使用 `#detial` 指令查看。比如：`#da https://hk4e-api.mihoyo.com/event/xxxxx` 。
 - `#dah`: 历史抽卡分析，即使用之前的数据生成分析图。可选参数为 `样式`，同 `#da` 的此参数。
 - `#export`: 导出抽卡分析数据，可选参数 `json` 或 `excel`或 `url`，在群聊使用该指令会将结果上传至群文件，在私聊如果 BOT
   持有者未配置 OSS 则不能使用。
@@ -66,6 +65,20 @@ authkey过期或有误，重新获取url设置。
 此问题大概率出现在 Windows 系统，可尝试在程序启动前手动安装 `exceljs`、`qiniu` 、 `qrcode`、`@aws-sdk/client-s3`
 四个依赖，`exceljs`
 为必选依赖，其他依赖若未在配置中启用也可不安装。
+
+## 清理旧Cookie的方法
+
+v2不再使用抽卡分析独立Cookie而使用私人服务的Cookie，要想清理这些冗余的数据，可以通过下面的命令删除。
+
+```shell
+## 第一步： 进入 redis 容器内部
+docker exec -it adachi-redis bash
+
+## 第二步：执行删除命令(端口、密码可参考注释内容修改)
+#redis-cli -p <port> -a <password> keys <key_prefix>* | xargs redis-cli -p <port> -a <password> del
+
+redis-cli -p 56379 keys "genshin_gacha.cookie.*" | xargs redis-cli -p 56379 del
+```
 
 # 4.更新日志
 

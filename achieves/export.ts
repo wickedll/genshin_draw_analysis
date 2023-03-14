@@ -11,7 +11,7 @@ import {
 import moment from "moment";
 import fs from "fs";
 import { resolve } from "path";
-import { isGroupMessage, isPrivateMessage } from "@modules/message";
+import { isGroupMessage } from "@modules/message";
 import {
 	convert2Lang,
 	convert2Readable,
@@ -19,23 +19,23 @@ import {
 	get_sheet_name,
 	getColor,
 	getTimeOut,
-	secondToString,
 	upload2Qiniu
 } from "#genshin_draw_analysis/util/util";
 
 import { randomSecret } from "@modules/utils";
 import { gacha_config } from "#genshin_draw_analysis/init";
 import bot from "ROOT";
-import { ImgPttElem, segment, Sendable } from "oicq";
+import { ImageElem, MessageRet, segment, Sendable } from "icqq";
 import { Logger } from "log4js";
+import { secondToString } from "#coser-image/util/time";
 import { Private } from "#genshin/module/private/main";
 import { getPrivateAccount } from "#genshin/utils/private";
 
 const gacha_types = [ "301", "400", "302", "100", "200" ];
 
-async function sendExportResult( url: string, logger: Logger, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<void> ) {
+async function sendExportResult( url: string, logger: Logger, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<MessageRet> ) {
 	if ( gacha_config.qrcode ) {
-		const QRCode = require( "qrcode" );
+		const { toDataURL } = require( "qrcode" );
 		const options = {
 			errorCorrectionLevel: 'H',
 			margin: 1,
@@ -44,14 +44,14 @@ async function sendExportResult( url: string, logger: Logger, sendMessage: ( con
 				light: '#FFF',
 			}
 		}
-		QRCode.toDataURL( url, options, ( err: any, image: string ) => {
+		toDataURL( url, options, ( err: any, image: string ) => {
 			if ( err || !image ) {
 				logger.error( "二维码生成失败", err );
 				sendMessage( `抽卡记录文件已导出，可在浏览器访问 ${ url } 下载查看。` );
 				return;
 			}
 			image = image.replace( "data:image/png;base64,", "" );
-			const qr_code: ImgPttElem = segment.image( `base64://${ image }` );
+			const qr_code: ImageElem = segment.image( `base64://${ image }` );
 			sendMessage( qr_code );
 		} )
 	} else {
@@ -59,15 +59,8 @@ async function sendExportResult( url: string, logger: Logger, sendMessage: ( con
 	}
 }
 
-async function export2JSON( export_data: Standard_Gacha, {
-	file,
-	sendMessage,
-	messageData,
-	client,
-	redis,
-	logger,
-	auth
-}: InputParameter ) {
+async function export2JSON( export_data: Standard_Gacha, i: InputParameter ) {
+	const { file, sendMessage, messageData, redis, logger, auth } = i;
 	if ( export_data.list.length === 0 ) {
 		await sendMessage( `当前账号${ export_data.info || "" }无历史抽卡数据.` );
 		return;
@@ -110,12 +103,7 @@ async function export2JSON( export_data: Standard_Gacha, {
 			fs.unlinkSync( export_json_path );
 		}
 	}
-	if ( isGroupMessage( messageData ) ) {
-		await client.acquireGfs( messageData.group_id ).upload( export_json_path );
-		// 导出后删掉临时文件
-		fs.unlinkSync( export_json_path );
-		await sendMessage( `抽卡记录文件已导出至${ file_name }` );
-	}
+	await uploadFile( export_json_path, file_name, i );
 }
 
 
@@ -170,18 +158,46 @@ function setHeaderStyle( headers: string[], sheet ) {
 	} );
 }
 
+async function uploadFile( file_path: string, file_name: string, {
+	client,
+	messageData,
+	logger,
+	sendMessage
+}: InputParameter ) {
+	if ( isGroupMessage( messageData ) ) {
+		try {
+			await client.pickGroup( messageData.group_id ).fs.upload( file_path, "/genshin/gacha_export", file_name, percentage => {
+				logger.debug( percentage );
+			} );
+			await sendMessage( `抽卡记录文件已导出至${ file_name }` );
+		} catch ( e ) {
+			logger.warn( `抽卡记录导出文件 ${ file_name } 上传群文件失败`, e );
+			await sendMessage( "抽卡记录导出文件上传群文件失败，请重试！" );
+		} finally {
+			// 导出后删掉临时文件
+			fs.unlinkSync( file_path );
+		}
+	} else {
+		try {
+			await client.pickFriend( messageData.from_id ).sendFile( file_path, file_name, percentage => {
+				logger.debug( percentage );
+			} );
+			await sendMessage( `抽卡记录文件已导出至${ file_name }` );
+		} catch ( e ) {
+			logger.warn( `抽卡记录导出文件 ${ file_name } 上传文件失败`, e );
+			await sendMessage( "抽卡记录导出文件上传文件失败，请重试！" );
+		} finally {
+			// 导出后删掉临时文件
+			fs.unlinkSync( file_path );
+		}
+	}
+}
+
 async function export2Excel( {
 	                             info: { uid, lang, export_timestamp },
 	                             list
-                             }: Standard_Gacha, {
-	                             file,
-	                             client,
-	                             messageData,
-	                             sendMessage,
-	                             redis,
-	                             logger,
-	                             auth
-                             }: InputParameter ) {
+                             }: Standard_Gacha, i: InputParameter ) {
+	const { file, messageData, sendMessage, redis, logger, auth } = i;
 	if ( list.length === 0 ) {
 		await sendMessage( `当前账号${ uid || "" }无历史抽卡数据.` );
 		return;
@@ -327,12 +343,7 @@ async function export2Excel( {
 			return;
 		}
 	}
-	if ( isGroupMessage( messageData ) ) {
-		await client.acquireGfs( messageData.group_id ).upload( export_excel_path );
-		// 导出后删掉临时文件
-		fs.unlinkSync( export_excel_path );
-		await sendMessage( `抽卡记录文件已导出至${ file_name }` );
-	}
+	await uploadFile( export_excel_path, file_name, i );
 }
 
 async function export_gacha_url( user_id: number, sn: string, { redis, sendMessage, auth, logger }: InputParameter ) {
@@ -347,41 +358,30 @@ async function export_gacha_url( user_id: number, sn: string, { redis, sendMessa
 	}
 	
 	let info: Private | string | undefined;
-	// 优先从抽卡分析的key中获取Cookie等信息
-	let { cookie, uid: game_uid, server, mysID } = await redis.getHash( `genshin_gacha.cookie.${ user_id }` );
-	if ( !cookie ) {
-		// 再从私人服务获取Cookie
-		info = await getPrivateAccount( user_id, sn, auth );
-		if ( typeof info === "string" ) {
-			await sendMessage( info );
-			return;
-		}
-		cookie = info.setting.cookie;
-		game_uid = info.setting.uid;
-		server = info.setting.server;
-		mysID = info.setting.mysID;
+	// 从私人服务获取Cookie
+	info = await getPrivateAccount( user_id, sn, auth );
+	if ( typeof info === "string" ) {
+		await sendMessage( info );
+		return;
 	}
 	let gen_res: GachaUrl | undefined
 	try {
-		gen_res = await generatorUrl( cookie, game_uid, mysID, server );
+		gen_res = await generatorUrl( info.setting.stoken, info.setting.uid, info.setting.mysID, info.setting.server );
 	} catch ( e ) {
 		logger.error( <string>e );
 		await sendMessage( <string>e );
 		return;
 	}
 	if ( gen_res ) {
-		const { api_log_url, log_html_url } = gen_res;
+		const { api_log_url, log_html_url, cookie } = gen_res;
 		url = api_log_url;
 		// 更新ck
-		if ( info && info instanceof Private ) {
+		if ( cookie ) {
 			await info.replaceCookie( cookie );
-		} else {
-			await redis.setHashField( `genshin_gacha.cookie.${ user_id }`, "cookie", cookie );
 		}
 		// 校验成功放入缓存，不需要频繁生成URL
 		await redis.setString( `genshin_draw_analysis_url-${ user_id }.${ sn || "0" }`, url, 24 * 60 * 60 );
-		await redis.setString( `genshin_draw_analysis_html_url-${ user_id }.${ sn || "0" }`, log_html_url, 24 * 60 * 60 );
-		
+		await redis.setString( key, log_html_url, 24 * 60 * 60 );
 		await sendMessage( log_html_url );
 		await sendMessage( "链接将在24小时后过期。" );
 		return;
@@ -389,8 +389,8 @@ async function export_gacha_url( user_id: number, sn: string, { redis, sendMessa
 }
 
 export async function main( bot: InputParameter ): Promise<void> {
-	const { sendMessage, messageData, redis } = bot;
-	const { user_id, raw_message } = messageData;
+	const { sendMessage, messageData, redis, auth } = bot;
+	const { sender: { user_id }, raw_message } = messageData;
 	const reg = new RegExp( /(?<type>json|excel|url)(\s)*(?<sn>\d+)?/ );
 	const res: RegExpExecArray | null = reg.exec( raw_message );
 	const type: string = res?.groups?.type || "";
@@ -400,14 +400,19 @@ export async function main( bot: InputParameter ): Promise<void> {
 		return;
 	}
 	
-	if ( !( gacha_config.qiniuOss.enable || gacha_config.qiniuOss.uses3 ) && isPrivateMessage( messageData ) ) {
-		await sendMessage( '未启用 OSS 存储，暂不支持私聊导出文件' );
-		return;
-	}
-	
 	const gacha_data_list: Standard_Gacha_Data[] = [];
 	// 获取存储的抽卡记录数据
-	const uid: string = await redis.getString( `genshin_draw_analysis_curr_uid-${ user_id }` );
+	let uid: string = "";
+	if ( sn ) {
+		const info = await getPrivateAccount( user_id, sn, auth );
+		if ( typeof info === "string" ) {
+			await sendMessage( info );
+			return;
+		}
+		uid = info.setting.uid;
+	} else {
+		uid = await redis.getString( `genshin_draw_analysis_curr_uid-${ user_id }` );
+	}
 	let lang: string = "zh-cn";
 	for ( let gacha_type of gacha_types ) {
 		const gacha_data_map: Record<string, string> = await redis.getHash( `genshin_draw_analysis_data-${ gacha_type }-${ uid }` );
@@ -434,7 +439,7 @@ export async function main( bot: InputParameter ): Promise<void> {
 		uid,
 		lang,
 		export_app: 'Adachi-BOT',
-		export_app_version: '1.0.0',
+		export_app_version: '2.0.0',
 		export_time: moment().format( "yy-MM-DD HH:mm:ss" ),
 		export_timestamp: Date.now() / 1000 | 0,
 		uigf_version: 'v2.2'

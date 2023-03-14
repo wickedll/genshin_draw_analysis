@@ -5,76 +5,85 @@ const template =
 		<div class="item" v-show="info['301'].total > 0">
 			<span class="title">角色活动祈愿</span>
 			<div id="up-role" style="width:400px;height:400px;"></div>
-			<span class="time">{{info["301"].time}}</span>
+			<span class="time">{{info['301'].time}}</span>
 			<div class="info">
-				<span class="total">总计 <span class="lj">{{ info["301"].total }}</span> 抽 已累计 <span class="wc">{{info["301"].wc}}</span> 抽未出5星</span>
-				<span class="five">5星：{{info["301"].w5+info["301"].j5}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["301"].lv5}}]</span>
-				<span class="four">4星：{{info["301"].w4+info["301"].j4}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["301"].lv4}}]</span>
-				<span class="third">3星：{{info["301"].w3}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["301"].lv3}}]</span>
-				<div class="jl">
+				<p><span class="total">总计 <span class="lj">{{ info['301'].total }}</span> 抽 已累计 <span class="wc">{{info['301'].wc}}</span> 抽未出5星</span></p>
+				<p>
+					<span class="five"><span class="statistics">5星：{{info['301'].w5+info['301'].j5}}</span>[{{info['301'].lv5}}]</span>
+					<span class="four"><span class="statistics">4星：{{info['301'].w4+info['301'].j4}}</span>[{{info['301'].lv4}}]</span>
+					<span class="third"><span class="statistics">3星：{{info['301'].w3}}</span>[{{info['301'].lv3}}]</span>
+				</p>
+				<p><div class="jl">
 					<span>5星历史记录：</span>
 					<span v-for="el in info['301'].history" class="jl2">
 						<span :style="{'color': getColor(el.name)}">{{el.name}}[{{el.count}}]&nbsp;</span>
 					</span>
-				</div>
-				<span class="total">5星平均出货次数为：<span class="per">{{info["301"].per}}</span></span>
+				</div></p>
+				<p><span class="total">5星平均出货次数为：<span class="per">{{info['301'].per}}</span></span></p>
 			</div>
 		</div>
 		<div class="item" v-show="info['302'].total > 0">
 			<span class="title">武器活动祈愿</span>
 			<div id="up-arms" style="width:400px;height:400px;"></div>
-			<span class="time">{{info["302"].time}}</span>
+			<span class="time">{{info['302'].time}}</span>
 			<div class="info">
-				<span class="total">总计 <span class="lj">{{ info["302"].total }}</span> 抽 已累计 <span class="wc">{{info["302"].wc}}</span> 抽未出5星</span>
-				<span class="five">5星：{{info["302"].w5+info["302"].j5}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["302"].lv5}}]</span>
-				<span class="four">4星：{{info["302"].w4+info["302"].j4}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["302"].lv4}}]</span>
-				<span class="third">3星：{{info["302"].w3}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["302"].lv3}}]</span>
-				<div class="jl">
+				<p><span class="total">总计 <span class="lj">{{ info['302'].total }}</span> 抽 已累计 <span class="wc">{{info['302'].wc}}</span> 抽未出5星</span></p>
+				<p>
+					<span class="five"><span class="statistics">5星：{{info['302'].w5+info['302'].j5}}</span>[{{info['302'].lv5}}]</span>
+					<span class="four"><span class="statistics">4星：{{info['302'].w4+info['302'].j4}}</span>[{{info['302'].lv4}}]</span>
+					<span class="third"><span class="statistics">3星：{{info['302'].w3}}</span>[{{info['302'].lv3}}]</span>
+				</p>
+				<p><div class="jl">
 					<span>5星历史记录：</span>
 					<span v-for="el in info['302'].history" class="jl2">
 						<span :style="{'color': getColor(el.name)}">{{el.name}}[{{el.count}}]&nbsp;</span>
 					</span>
-				</div>
-				<span class="total">5星平均出货次数为：<span class="per">{{info["302"].per}}</span></span>
+				</div></p>
+				<p><span class="total">5星平均出货次数为：<span class="per">{{info['302'].per}}</span></span></p>
 			</div>
 		</div>
 		<div class="item" v-show="info['200'].total > 0">
 			<span class="title">常驻祈愿</span>
 			<div id="permanent" style="width:400px;height:400px;"></div>
-			<span class="time">{{info["200"].time}}</span>
+			<span class="time">{{info['200'].time}}</span>
 			<div class="info">
-				<span class="total">总计 <span class="lj">{{ info["200"].total }}</span> 抽 已累计 <span class="wc">{{info["200"].wc}}</span> 抽未出5星</span>
-				<span class="five">5星：{{info["200"].w5+info["200"].j5}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["200"].lv5}}]</span>
-				<span class="four">4星：{{info["200"].w4+info["200"].j4}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["200"].lv4}}]</span>
-				<span class="third">3星：{{info["200"].w3}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["200"].lv3}}]</span>
-				<div class="jl">
+				<p><span class="total">总计 <span class="lj">{{ info['200'].total }}</span> 抽 已累计 <span class="wc">{{info['200'].wc}}</span> 抽未出5星</span></p>
+				<p>
+					<span class="five"><span class="statistics">5星：{{info['200'].w5+info['200'].j5}}</span>[{{info['200'].lv5}}]</span>
+					<span class="four"><span class="statistics">4星：{{info['200'].w4+info['200'].j4}}</span>[{{info['200'].lv4}}]</span>
+					<span class="third"><span class="statistics">3星：{{info['200'].w3}}</span>[{{info['200'].lv3}}]</span>
+				</p>
+				<p><div class="jl">
 					<span>5星历史记录：</span>
 					<span v-for="el in info['200'].history" class="jl2">
 						<span :style="{'color': getColor(el.name)}">{{el.name}}[{{el.count}}]&nbsp;</span>
 					</span>
-				</div>
-				<span class="total">5星平均出货次数为：<span class="per">{{info["200"].per}}</span></span>
+				</div></p>
+				<p><span class="total">5星平均出货次数为：<span class="per">{{info['200'].per}}</span></span></p>
 			</div>
-			
 		</div>
+		
 		<div class="item" v-show="info['100'].total > 0">
 			<span class="title">新手祈愿</span>
 			<div id="novice" style="width:400px;height:400px;"></div>
-			<span class="time">{{info["100"].time}}</span>
+			<span class="time">{{info['100'].time}}</span>
 			<div class="info">
-				<span class="total">总计 <span class="lj">{{ info["100"].total }}</span> 抽 已累计 <span class="wc">{{info["100"].wc}}</span> 抽未出5星</span>
-				<span class="five">5星：{{info["100"].w5+info["100"].j5}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["100"].lv5}}]</span>
-				<span class="four">4星：{{info["100"].w4+info["100"].j4}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["100"].lv4}}]</span>
-				<span class="third">3星：{{info["100"].w3}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{info["100"].lv3}}]</span>
-				<div class="jl">
+				<p><span class="total">总计 <span class="lj">{{ info['100'].total }}</span> 抽 已累计 <span class="wc">{{info['100'].wc}}</span> 抽未出5星</span></p>
+				<p>
+					<span class="five"><span class="statistics">5星：{{info['100'].w5+info['100'].j5}}</span>[{{info['100'].lv5}}]</span>
+					<span class="four"><span class="statistics">4星：{{info['100'].w4+info['100'].j4}}</span>[{{info['100'].lv4}}]</span>
+					<span class="third"><span class="statistics">3星：{{info['100'].w3}}</span>[{{info['100'].lv3}}]</span>
+				</p>
+				<p><div class="jl">
 					<span>5星历史记录：</span>
 					<span v-for="el in info['100'].history" class="jl2">
 						<span :style="{'color': getColor(el.name)}">{{el.name}}[{{el.count}}]&nbsp;</span>
 					</span>
-				</div>
-				<span class="total">5星平均出货次数为：<span class="per">{{info["100"].per}}</span></span>
+				</div></p>
+				<p><span class="total">5星平均出货次数为：<span class="per">{{info['100'].per}}</span></span></p>
 			</div>
 		</div>
+		
 		<div class="tips" v-show="info['301'].total === 0 && info['302'].total === 0 && info['200'].total === 0 && info['100'].total === 0">您无抽卡记录，或者抽卡记录已全部过期。</div>
 	</div>
 	<div class="footer">Create by lishengqunchn © lishengqun.com</div>
@@ -102,16 +111,23 @@ export default defineComponent( {
 					const myChart100 = echarts.init( document.getElementById( 'novice' ) );
 					const options100 = {
 						legend: {
-							// Try 'horizontal'
-							orient: 'vertical',
-							right: 10,
-							top: 'center',
-							data: [ '五星角色', '五星武器', '四星角色', '四星武器', '三星武器' ]
+							left: 'center',
+							top: '10%',
+							selected: {
+								'三星武器': data[element].w3 <= 20
+							}
+						},
+						textStyle: {
+							fontFamily: 'GachaFont',
+							fontStyle: 'normal',
 						},
 						series: [ {
 							type: 'pie',
 							stillShowZeroSum: false,
+							top: 50,
 							radius: '50%',
+							startAngle: 70,
+							color: [ '#fac858', '#ee6666', '#5470c6', '#91cc75', '#73c0de' ],
 							data: [
 								{
 									value: data[element].j5,
@@ -146,14 +162,23 @@ export default defineComponent( {
 					const myChart301 = echarts.init( document.getElementById( 'up-role' ), null, { renderer: 'svg' } );
 					const options301 = {
 						legend: {
-							orient: 'horizontal',
-							top: 20,
-							data: [ '五星角色', '五星武器', '四星角色', '四星武器', '三星武器' ]
+							left: 'center',
+							top: '10%',
+							selected: {
+								'三星武器': data[element].w3 <= 20
+							}
+						},
+						textStyle: {
+							fontFamily: 'GachaFont',
+							fontStyle: 'normal',
 						},
 						series: [ {
 							type: 'pie',
 							stillShowZeroSum: false,
+							top: 50,
 							radius: '50%',
+							startAngle: 70,
+							color: [ '#fac858', '#5470c6', '#91cc75', '#73c0de' ],
 							data: [
 								{
 									value: data[element].j5,
@@ -184,14 +209,23 @@ export default defineComponent( {
 					const myChart302 = echarts.init( document.getElementById( 'up-arms' ) );
 					const options302 = {
 						legend: {
-							orient: 'horizontal',
-							top: 20,
-							data: [ '五星角色', '五星武器', '四星角色', '四星武器', '三星武器' ]
+							left: 'center',
+							top: '10%',
+							selected: {
+								'三星武器': data[element].w3 <= 20
+							}
+						},
+						textStyle: {
+							fontFamily: 'GachaFont',
+							fontStyle: 'normal',
 						},
 						series: [ {
 							type: 'pie',
 							stillShowZeroSum: false,
+							top: 50,
 							radius: '50%',
+							startAngle: 70,
+							color: [ '#ee6666', '#5470c6', '#91cc75', '#73c0de' ],
 							data: [
 								{
 									value: data[element].w5,
@@ -222,14 +256,23 @@ export default defineComponent( {
 					const myChart200 = echarts.init( document.getElementById( 'permanent' ) );
 					const options200 = {
 						legend: {
-							orient: 'horizontal',
-							top: 20,
-							data: [ '五星角色', '五星武器', '四星角色', '四星武器', '三星武器' ]
+							left: 'center',
+							top: '10%',
+							selected: {
+								'三星武器': data[element].w3 <= 20
+							}
+						},
+						textStyle: {
+							fontFamily: 'GachaFont',
+							fontStyle: 'normal',
 						},
 						series: [ {
 							type: 'pie',
 							stillShowZeroSum: false,
+							top: 50,
 							radius: '50%',
+							startAngle: 70,
+							color: [ '#fac858', '#ee6666', '#5470c6', '#91cc75', '#73c0de' ],
 							data: [
 								{
 									value: data[element].j5,
@@ -326,15 +369,15 @@ export default defineComponent( {
 				time: total > 0 ? `${ element.data[0].time.split( " " )[0] }  ~  ${ element.data[total - 1].time.split( " " )[0] }` : ""
 			}
 		}
-		
 		const getColor = function ( name ) {
 			let index = getRandomNum( 0, colors.length - 1 );
 			if ( nameColor[name] ) {
 				return nameColor[name];
 			}
-			//颜色用尽 返回默认颜色
+			// //颜色用尽 返回默认颜色
 			if ( Object.keys( usedColor ).length >= colors.length ) {
-				return "#800000";
+				usedColor = {};
+				return getColor( name );
 			}
 			let color = colors[index];
 			while ( usedColor[color] ) {
@@ -355,11 +398,8 @@ export default defineComponent( {
 
 //颜色池
 const colors = [
-	"orange", "#EA0000", "#FF359A", "#FF00FF", "#9F35FF", "#2828FF", "#0072E3", "#00CACA", "#02DF82", "#00BB00", "#82D900", "#EA7500", "#F75000",
-	"#AD5A5A", "#5151A2", "#8F4586", "#FFB6C1", "#FF6EB4", "#DC143C", "#DB7093", "#FF69B4", "#FF1493", "#C71585", "#DA70D6", "#D8BFD8", "#DDA0DD",
-	"#EE82EE", "#8B008B", "#800080", "#BA55D3", "#9400D3", "#9932CC", "#4B0082", "#8A2BE2", "#9370DB", "#7B68EE", "#6A5ACD", "#483D8B", "#87CEFF",
-	"#00BFFF", "#5F9EA0", "#00CED1", "#008B8B", "#00FA9A", "#00FF00", "#9999FF", "#FFA500", "#DAA520", "#4169E1", "#FF8C00", "#F4A460", "#D2691E",
-	"#FF6600", "#8B4513", "#FFA07A", "#FF7F50", "#FF4500", "#E9967A", "#FF6347", "#FA8072", "#F08080", "#B22222"
+	'#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#2ab7ca',
+	'#005b96', '#ff8b94', '#72a007', '#b60d1b', '#16570d'
 ]
 let usedColor = {}
 let nameColor = {}
