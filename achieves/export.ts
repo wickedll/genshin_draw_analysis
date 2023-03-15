@@ -19,6 +19,7 @@ import {
 	get_sheet_name,
 	getColor,
 	getTimeOut,
+	secondToString,
 	upload2Qiniu
 } from "#genshin_draw_analysis/util/util";
 
@@ -27,7 +28,6 @@ import { gacha_config } from "#genshin_draw_analysis/init";
 import bot from "ROOT";
 import { ImageElem, MessageRet, segment, Sendable } from "icqq";
 import { Logger } from "log4js";
-import { secondToString } from "#coser-image/util/time";
 import { Private } from "#genshin/module/private/main";
 import { getPrivateAccount } from "#genshin/utils/private";
 
