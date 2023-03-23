@@ -12,7 +12,6 @@
 }
 .header{
     font-size: 20px;
-    font-weight: bolder;
     margin-bottom: 50px;
 }
 .footer{
@@ -20,69 +19,77 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    font-weight: bolder;
 }
 .item{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 400px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	max-width: 450px;
 }
 .title{
-    font-weight: bolder;
 }
-.total{
-    font-size: 14px;
-    color: rgba(0,0,0,0.6);
-    display: block;
+.total {
+	font-size: 14px;
+	color: rgba(0, 0, 0, 0.85);
+	display: block;
 }
 .lj{
     color: #3f85ff;
 }
-.wc{
-    color: green;
+
+.wc {
+	color: green;
 }
-.info{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    height: 250px;
-    font-weight: bolder;
+
+.info {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-start;
+	height: 250px;
+	padding: 20px 50px 0;
 }
-.five{
-    font-size: 14px;
-    color: orange;
-    display: block;
+
+.statistics {
+	display: inline-block;
+	width: 100px;
 }
-.four{
-    font-size: 14px;
-    color: orchid;
-    display: block;
+
+.five {
+	font-size: 14px;
+	color: rgb(192, 113, 61);
+	display: block;
 }
-.third{
-    font-size: 14px;
-    color: #3f85ff;
-    display: block;
+
+.four {
+	font-size: 14px;
+	color: rgb(166, 95, 226);
+	display: block;
+}
+.third {
+	font-size: 14px;
+	color: rgb(77, 141, 247);
+	display: block;
 }
 .per{
     color: green;
 }
-.jl{
-    font-size: 14px;
-    color: rgba(0,0,0,0.6);
-    word-wrap: break-word;
+.jl {
+	font-size: 14px;
+	color: rgba(0, 0, 0, 0.85);
+	word-wrap: break-word;
 }
 
 .jl2 {
 	color: #fac858;
+	margin: 4px;
 }
 
 .time {
 	font-size: 14px;
-	color: rgba(0, 0, 0, 0.6);
-	font-weight: bolder;
+	color: rgba(0, 0, 0, 0.85);
 }
 
 .tips {

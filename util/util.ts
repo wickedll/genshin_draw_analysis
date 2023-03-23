@@ -64,6 +64,7 @@ export function obj2ParamsStr( obj: object ): string {
 
 export function cookie2Obj( cookie: string ): any {
 	return decodeURIComponent( cookie ).split( ";" )
+		.filter( item => !!item && item.trim().length > 0 )
 		.map( item => item.split( '=' ) )
 		.reduce( ( acc, [ k, v ] ) => ( acc[k.trim().replace( '"', '' )] = v ) && acc, {} );
 }

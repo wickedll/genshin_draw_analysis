@@ -1,6 +1,5 @@
 import { PluginSetting } from "@modules/plugin";
 import { OrderConfig } from "@modules/command";
-import { MessageScope } from "@modules/message";
 import { createServer } from "./server";
 import { PageFunction, Renderer } from "@modules/renderer";
 import { checkDependencies, execHandle, sleep } from "./util/util";
@@ -20,31 +19,19 @@ export let pageFunction: PageFunction = async ( page: puppeteer.Page ) => {
 	const element = await page.$( '#app' );
 	const result = <string>await element?.screenshot( option );
 	const base64: string = `base64://${ result }`;
-	const cqCode: string = `[CQ:image,file=${ base64 }]`;
-	return cqCode;
-}
-
-
-const draw_url: OrderConfig = {
-	type: "order",
-	cmdKey: "genshin.draw.analysis.url",
-	desc: [ "原神抽卡记录URL设置", "(记录URL|通行证Cookie)" ],
-	headers: [ "su" ],
-	regexps: [ ".+" ],
-	main: "achieves/draw_url",
-	detail: "设置抽卡记录url或者米游社通行证的Cookie",
-	scope: MessageScope.Private,
-	ignoreCase: false
+	return base64;
 }
 
 const draw_analysis: OrderConfig = {
 	type: "order",
 	cmdKey: "genshin.draw.analysis",
-	desc: [ "抽卡分析", "(私人服务序号) (样式)" ],
+	desc: [ "抽卡分析", "([抽卡链接] | (私人服务序号) (样式))" ],
 	headers: [ "da" ],
-	detail: "使用设置的抽卡记录URL重新拉取数据并合并历史数据分析, 1: pc样式,2: phone样式，如果只传一个参数优先匹配服务序号。\n" +
-		"如果设置了抽卡分析的Cookie将优先使用抽卡分析的Cookie，否则将使用私人服务中的Cookie",
-	regexps: [ "(\\d+)?", "(\\d+)?" ],
+	detail: "1) 使用链接直接分析抽卡数据，此时可以将链接作为参数直接传入\n" +
+		"2) 使用私人服务的Cookie分析抽卡数据,此时可以传入两个可选参数: 序号、样式。\n" +
+		"3) 1: 饼图样式,2: 角色图标样式，默认使用角色图标样式，需要更改样式时必须传序号。",
+	regexps: [ ".*" ],
+	ignoreCase: false,
 	main: "achieves/draw_analysis"
 };
 
@@ -54,7 +41,7 @@ const draw_analysis_history: OrderConfig = {
 	desc: [ "抽卡分析历史记录", "(样式)" ],
 	headers: [ "dah" ],
 	regexps: [ "(\\d+)?" ],
-	detail: "使用历史数据分析, 1: pc样式,2: phone样式",
+	detail: "使用历史数据分析, 1: 饼图样式,2: 角色图标样式",
 	main: "achieves/draw_analysis_history"
 };
 
@@ -75,6 +62,7 @@ const import_gacha_log: OrderConfig = {
 	headers: [ "import" ],
 	regexps: [ "(json|excel)", "(https?:\\/\\/(?:www\\.)?[-a-zA-Z\\d@:%._+~#=]{1,256}\\.[a-zA-Z\\d()]{1,6}\\b[-a-zA-Z\\d()!@:%_+.~#?&/=]*)?" ],
 	detail: "导入抽卡记录，目前支持json、excel。先发送文件，然后回复这个文件消息，在此消息中使用该指令，也可以给一个文件的下载链接。",
+	ignoreCase: false,
 	main: "achieves/import"
 };
 
@@ -119,10 +107,11 @@ export async function init( { logger, file, renderer: botRender, refresh }: BOT 
 	createServer( port, logger );
 	return {
 		pluginName: "genshin_draw_analysis",
-		cfgList: [ draw_url, draw_analysis, draw_analysis_history, export_gacha_log, import_gacha_log, del_gacha_log ],
+		cfgList: [ draw_analysis, draw_analysis_history, export_gacha_log, import_gacha_log, del_gacha_log ],
 		repo: {
 			owner: "wickedll",
-			repoName: "genshin_draw_analysis"
+			repoName: "genshin_draw_analysis",
+			ref: "master"
 		},
 		aliases: gacha_config.aliases
 	};
