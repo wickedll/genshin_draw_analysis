@@ -23,13 +23,14 @@ import {
 	upload2Qiniu
 } from "#genshin_draw_analysis/util/util";
 
-import { randomSecret } from "@modules/utils";
+import { getRandomStr } from "@modules/utils";
 import { gacha_config } from "#genshin_draw_analysis/init";
 import bot from "ROOT";
 import { ImageElem, MessageRet, segment, Sendable } from "icqq";
 import { Logger } from "log4js";
 import { Private } from "#genshin/module/private/main";
 import { getPrivateAccount } from "#genshin/utils/private";
+import FileManagement from "@modules/file";
 
 const gacha_types = [ "301", "400", "302", "100", "200" ];
 
@@ -266,7 +267,7 @@ async function export2Excel( {
 			await addRowAndSetStyle( sheet, data );
 		}
 		// 设置保护模式，避免用户随意修改内容
-		await sheet.protect( randomSecret( 20 ), {
+		await sheet.protect( getRandomStr( 20 ), {
 			formatCells: true,
 			formatRows: true,
 			formatColumns: true,
@@ -308,7 +309,7 @@ async function export2Excel( {
 		await addRowAndSetStyle( sheet, data );
 	}
 	// 设置保护模式，避免用户随意修改内容
-	await sheet.protect( randomSecret( 20 ), {
+	await sheet.protect( getRandomStr( 20 ), {
 		formatCells: true,
 		formatRows: true,
 		formatColumns: true,
@@ -388,6 +389,12 @@ async function export_gacha_url( user_id: number, sn: string, { redis, sendMessa
 	}
 }
 
+function getVersion( file: FileManagement ): string {
+	const path: string = file.getFilePath( "package.json", "root" );
+	const { version } = require( path );
+	return version.split( "-" )[0];
+}
+
 export async function main( bot: InputParameter ): Promise<void> {
 	const { sendMessage, messageData, redis, auth } = bot;
 	const { sender: { user_id }, raw_message } = messageData;
@@ -439,7 +446,7 @@ export async function main( bot: InputParameter ): Promise<void> {
 		uid,
 		lang,
 		export_app: 'Adachi-BOT',
-		export_app_version: '2.0.0',
+		export_app_version: `v${ getVersion( bot.file ) }`,
 		export_time: moment().format( "yy-MM-DD HH:mm:ss" ),
 		export_timestamp: Date.now() / 1000 | 0,
 		uigf_version: 'v2.2'

@@ -87,7 +87,6 @@ export async function main( bot: InputParameter ): Promise<void> {
 	
 	let url: string;
 	const unit: Group | User = isPrivateMessage( messageData ) ? client.pickUser( source.user_id ) : client.pickGroup( messageData.group_id );
-	const t = await unit.getChatHistory();
 	const time: number = isPrivateMessage( messageData ) ? source.time + 10 : source.seq;
 	const chatHistory: PrivateMessage[] | GroupMessage[] = await unit.getChatHistory( time, 1 );
 	if ( chatHistory.length === 0 ) {

@@ -109,9 +109,9 @@ export async function init( { logger, file, renderer: botRender, refresh }: BOT 
 		pluginName: "genshin_draw_analysis",
 		cfgList: [ draw_analysis, draw_analysis_history, export_gacha_log, import_gacha_log, del_gacha_log ],
 		repo: {
-			owner: "BennettChina",
+			owner: "wickedll",
 			repoName: "genshin_draw_analysis",
-			ref: "v2_icqq"
+			ref: "master"
 		},
 		aliases: gacha_config.aliases
 	};
