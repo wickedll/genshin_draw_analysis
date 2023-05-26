@@ -96,9 +96,10 @@ export default defineComponent( {
 				zo
 			}
 		}
-		
+		// 重新排序
+		const info = [ data2['301'], data2['302'], data2['200'], data2['100'] ].filter( obj => !!obj );
 		return {
-			info: data2,
+			info,
 			uid
 		}
 	}

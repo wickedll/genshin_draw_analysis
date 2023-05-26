@@ -1,26 +1,14 @@
 import { PluginSetting } from "@modules/plugin";
 import { OrderConfig } from "@modules/command";
 import { createServer } from "./server";
-import { PageFunction, Renderer } from "@modules/renderer";
-import { checkDependencies, execHandle, sleep } from "./util/util";
-import puppeteer from "puppeteer";
+import { Renderer } from "@modules/renderer";
+import { checkDependencies, execHandle } from "./util/util";
 import { findFreePort } from "@modules/utils";
 import GachaAnalysisConfig from "#genshin_draw_analysis/module/GachaAnalysisConfig";
 import { BOT } from "@modules/bot";
 
 export let renderer: Renderer;
 export let gacha_config: GachaAnalysisConfig;
-
-export let pageFunction: PageFunction = async ( page: puppeteer.Page ) => {
-	if ( page.url().indexOf( "analysis.html" ) > -1 ) {
-		await sleep( 2000 );
-	}
-	const option: puppeteer.ScreenshotOptions = { encoding: "base64" };
-	const element = await page.$( '#app' );
-	const result = <string>await element?.screenshot( option );
-	const base64: string = `base64://${ result }`;
-	return base64;
-}
 
 const draw_analysis: OrderConfig = {
 	type: "order",
