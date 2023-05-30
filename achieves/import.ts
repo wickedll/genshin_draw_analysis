@@ -87,11 +87,16 @@ export async function main( bot: InputParameter ): Promise<void> {
 	
 	let url: string;
 	const unit: Group | User = isPrivateMessage( messageData ) ? client.pickUser( source.user_id ) : client.pickGroup( messageData.group_id );
-	const time: number = isPrivateMessage( messageData ) ? source.time + 10 : source.seq;
-	const chatHistory: PrivateMessage[] | GroupMessage[] = await unit.getChatHistory( time, 1 );
+	const time: number = isPrivateMessage( messageData ) ? source.time + 100 : source.seq;
+	const cnt: number = isPrivateMessage( messageData ) ? 20 : 1;
+	let chatHistory: PrivateMessage[] | GroupMessage[] = await unit.getChatHistory( time, cnt );
 	if ( chatHistory.length === 0 ) {
 		await sendMessage( "未获取到要导入的文件，或可尝试使用文件链接导入。" );
 		return;
+	}
+	if ( isPrivateMessage( messageData ) ) {
+		// 私聊要根据seq过滤，这样才能精确拿到引用消息中的文件。
+		chatHistory = ( <PrivateMessage[]>chatHistory ).filter( m => m.seq === source.seq );
 	}
 	const replyMessage: MessageElem = chatHistory[0].message[0];
 	if ( replyMessage.type !== "file" ) {

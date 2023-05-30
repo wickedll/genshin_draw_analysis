@@ -3,22 +3,28 @@ import fetch from "node-fetch";
 import bot from "ROOT";
 import { generatorUrl, parseID, sleep } from "../util/util";
 import { RenderResult } from "@modules/renderer";
-import { pageFunction, renderer } from "../init";
-import { MessageRet, segment, Sendable } from "icqq";
+import { renderer } from "../init";
+import { MessageRet, Sendable } from "icqq";
 import { Private } from "#genshin/module/private/main";
 import { getPrivateAccount } from "#genshin/utils/private";
 import { GachaUrl } from "#genshin_draw_analysis/util/types";
+import { Viewport } from "puppeteer";
 
 
 export async function analysisHandler( idMsg: string, userID: number, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<MessageRet> ) {
 	let id = parseID( idMsg );
-	const res: RenderResult = await renderer.asForFunction(
+	const viewPort: Viewport = {
+		width: 2000,
+		height: 1000,
+		deviceScaleFactor: 2
+	};
+	const res: RenderResult = await renderer.asSegment(
 		id === 1 ? "/analysis-phone.html" : "/analysis.html",
-		pageFunction, null,
-		{ qq: userID }
+		{ qq: userID },
+		viewPort
 	);
 	if ( res.code === "ok" ) {
-		await sendMessage( segment.image( <string>res.data ) );
+		await sendMessage( res.data );
 	} else {
 		bot.logger.error( res.error );
 		await sendMessage( "图片渲染异常，请联系持有者进行反馈" );
