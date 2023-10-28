@@ -1,6 +1,6 @@
-import { InputParameter } from "@modules/command";
+import { defineDirective } from "@/modules/command";
 
-export async function main( { sendMessage, messageData, redis }: InputParameter ): Promise<void> {
+export default defineDirective( "order", async ( { sendMessage, messageData, redis } ) => {
 	const { user_id: userID } = messageData;
 	let uid: string = "";
 	try {
@@ -26,4 +26,4 @@ export async function main( { sendMessage, messageData, redis }: InputParameter 
 	await redis.deleteKey( ...keys );
 	
 	await sendMessage( `已清除${ uid }的抽卡统计数据。` );
-}
+} )

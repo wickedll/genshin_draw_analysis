@@ -1,9 +1,8 @@
-import { InputParameter } from "@modules/command";
-import { analysisHandler } from "#genshin_draw_analysis/achieves/draw_analysis";
+import { defineDirective } from "@/modules/command";
+import { analysisHandler } from "#/genshin_draw_analysis/achieves/draw_analysis";
 
-export async function main(
-	{ sendMessage, messageData, redis }: InputParameter
-): Promise<void> {
+export default defineDirective( "order", async ( i ) => {
+	const { sendMessage, messageData, redis } = i;
 	const { user_id: userID, raw_message: idMsg } = messageData;
 	let uid = '';
 	try {
@@ -18,5 +17,5 @@ export async function main(
 		return;
 	}
 	
-	await analysisHandler( idMsg, userID, sendMessage );
-}
+	await analysisHandler( idMsg, userID, i );
+} )

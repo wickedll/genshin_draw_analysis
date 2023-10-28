@@ -16,16 +16,17 @@ export default defineComponent( {
 	},
 	setup( props ) {
 		const background = computed( () => {
-			return `../images/5-Star.png`;
+			return `/genshin_draw_analysis/assets/images/5-Star.png`;
 		} );
 		const mainImage = computed( () => {
 			const type = props.data.type === "角色" ? "character" : "weapon";
+			const icon = props.data.type === "角色" ? "face" : "thumb";
 			const lang = props.data.lang;
 			let name = props.data.name;
 			if ( lang !== 'zh-cn' ) {
 				name = simplified( props.data.name );
 			}
-			return `https://adachi-bot.oss-cn-beijing.aliyuncs.com/Version2/thumb/${ type }/${ encodeURI( name ) }.png`;
+			return `/genshin/adachi-assets/${ type }/${ encodeURI( name ) }/image/${ icon }.webp`;
 		} );
 		
 		return {

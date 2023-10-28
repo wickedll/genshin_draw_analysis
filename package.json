@@ -1,0 +1,14 @@
+{
+  "name" : "genshin_draw_analysis",
+  "author" : "wickedll、Bennett",
+  "private" : true,
+  "license" : "MIT",
+  "version" : "2.0.0",
+  "description" : "本项目为Adachi-BOT衍生插件，用于原神抽卡记录分析！",
+  "dependencies" : {
+    "exceljs" : "^4.4.0",
+    "qiniu" : "^7.10.0",
+    "@aws-sdk/client-s3" : "^3.433.0",
+    "qrcode" : "^1.5.3"
+  }
+}
