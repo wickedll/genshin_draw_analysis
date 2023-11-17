@@ -3,7 +3,7 @@
   "author" : "wickedll、Bennett",
   "private" : true,
   "license" : "MIT",
-  "version" : "2.0.0",
+  "version" : "2.0.1",
   "description" : "本项目为Adachi-BOT衍生插件，用于原神抽卡记录分析！",
   "dependencies" : {
     "exceljs" : "^4.4.0",

@@ -27,6 +27,6 @@ export default definePlugin( {
 		gacha_config.on( 'refresh', newCfg => {
 			params.setAlias( newCfg.aliases );
 		} )
-		params.renderRegister( "#app", "views" );
+		renderer = params.renderRegister( "#app", "views" );
 	}
 } )
