@@ -1,7 +1,7 @@
 import { defineDirective, InputParameter } from "@/modules/command";
 import fetch from "node-fetch";
 import bot from "ROOT";
-import { generatorUrl, parseID, sleep } from "../util/util";
+import { generatorUrl, htmlDecode, parseID, sleep } from "../util/util";
 import { RenderResult } from "@/modules/renderer";
 import { renderer } from "../init";
 import { Private } from "#/genshin/module/private/main";
@@ -32,11 +32,12 @@ export async function analysisHandler( idMsg: string, userID: number, { sendMess
 
 export default defineDirective( "order", async ( i ) => {
 	const { sendMessage, messageData, redis, auth, logger } = i;
-	const { user_id: userID, raw_message } = messageData;
+	let { user_id: userID, raw_message } = messageData;
 	let url = 'https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?';
 	let style: string = "";
 	let sn: string = "";
 	// 链接方式
+	raw_message = htmlDecode( raw_message );
 	if ( raw_message.startsWith( "https://" ) ) {
 		try {
 			if ( raw_message.indexOf( "getGachaLog?" ) > -1 ) {

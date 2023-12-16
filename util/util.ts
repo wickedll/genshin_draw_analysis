@@ -298,4 +298,12 @@ export function secondToString( ttl: number ): string {
 	return `${ hour } 时 ${ minute } 分 ${ second } 秒`;
 }
 
+export function htmlDecode( str: string ): string {
+	str = str.replace( /&#(\d+);/gi, function ( match, numStr ) {
+		const num = parseInt( numStr, 10 );
+		return String.fromCharCode( num );
+	} );
+	return str.replace( /&amp;/gi, "&" );
+}
+
 export { sleep, parseID, generateDS };
