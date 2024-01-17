@@ -1,4 +1,4 @@
-import { InputParameter, Order } from "@modules/command";
+import { defineDirective, InputParameter, Order } from "@/modules/command";
 import {
 	Gacha_Info,
 	GachaUrl,
@@ -7,11 +7,10 @@ import {
 	Standard_Gacha_Excel,
 	Standard_Gacha_Excel_Origin_Data,
 	Standard_Gacha_Info
-} from "#genshin_draw_analysis/util/types";
+} from "#/genshin_draw_analysis/util/types";
 import moment from "moment";
 import fs from "fs";
 import { resolve } from "path";
-import { isGroupMessage } from "@modules/message";
 import {
 	convert2Lang,
 	convert2Readable,
@@ -21,28 +20,27 @@ import {
 	getTimeOut,
 	secondToString,
 	upload2Qiniu
-} from "#genshin_draw_analysis/util/util";
+} from "#/genshin_draw_analysis/util/util";
 
-import { getRandomStr } from "@modules/utils";
-import { gacha_config } from "#genshin_draw_analysis/init";
+import { gacha_config } from "#/genshin_draw_analysis/init";
 import bot from "ROOT";
-import { ImageElem, MessageRet, segment, Sendable } from "icqq";
-import { Logger } from "log4js";
-import { Private } from "#genshin/module/private/main";
-import { getPrivateAccount } from "#genshin/utils/private";
-import FileManagement from "@modules/file";
+import { Private } from "#/genshin/module/private/main";
+import { getPrivateAccount } from "#/genshin/utils/private";
+import FileManagement from "@/modules/file";
+import { getRandomString } from "@/utils/random";
+import { segment } from "@/modules/lib";
 
 const gacha_types = [ "301", "400", "302", "100", "200" ];
 
-async function sendExportResult( url: string, logger: Logger, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<MessageRet> ) {
+async function sendExportResult( url: string, { logger, sendMessage }: InputParameter ) {
 	if ( gacha_config.qrcode ) {
 		const { toDataURL } = require( "qrcode" );
 		const options = {
 			errorCorrectionLevel: 'H',
 			margin: 1,
 			color: {
-				dark: '#000',
-				light: '#FFF',
+				dark: '#/000',
+				light: '#/FFF',
 			}
 		}
 		toDataURL( url, options, ( err: any, image: string ) => {
@@ -52,7 +50,7 @@ async function sendExportResult( url: string, logger: Logger, sendMessage: ( con
 				return;
 			}
 			image = image.replace( "data:image/png;base64,", "" );
-			const qr_code: ImageElem = segment.image( `base64://${ image }` );
+			const qr_code = segment.image( `base64://${ image }` );
 			sendMessage( qr_code );
 		} )
 	} else {
@@ -93,7 +91,7 @@ async function export2JSON( export_data: Standard_Gacha, i: InputParameter ) {
 			const url: string = await upload2Qiniu( export_json_path, file_name, gacha_config.qiniuOss, redis );
 			// 导出后删掉临时文件
 			fs.unlinkSync( export_json_path );
-			await sendExportResult( url, logger, sendMessage );
+			await sendExportResult( url, i );
 			return;
 		} catch ( error ) {
 			logger.error( "抽卡记录导出成功，上传 OSS 失败！", error );
@@ -104,7 +102,7 @@ async function export2JSON( export_data: Standard_Gacha, i: InputParameter ) {
 			fs.unlinkSync( export_json_path );
 		}
 	}
-	await uploadFile( export_json_path, file_name, i );
+	// await uploadFile( export_json_path, file_name, i );
 }
 
 
@@ -159,6 +157,7 @@ function setHeaderStyle( headers: string[], sheet ) {
 	} );
 }
 
+/* 暂不支持该功能
 async function uploadFile( file_path: string, file_name: string, {
 	client,
 	messageData,
@@ -167,9 +166,11 @@ async function uploadFile( file_path: string, file_name: string, {
 }: InputParameter ) {
 	if ( isGroupMessage( messageData ) ) {
 		try {
-			await client.pickGroup( messageData.group_id ).fs.upload( file_path, "/genshin/gacha_export", file_name, percentage => {
-				logger.debug( percentage );
-			} );
+			await client.uploadGroupFile( messageData.group_id, {
+				file: file_path,
+				name: file_name,
+				folder: "/genshin/gacha_export"
+			} )
 			await sendMessage( `抽卡记录文件已导出至${ file_name }` );
 		} catch ( e ) {
 			logger.warn( `抽卡记录导出文件 ${ file_name } 上传群文件失败`, e );
@@ -180,8 +181,9 @@ async function uploadFile( file_path: string, file_name: string, {
 		}
 	} else {
 		try {
-			await client.pickFriend( messageData.from_id ).sendFile( file_path, file_name, percentage => {
-				logger.debug( percentage );
+			await client.uploadPrivateFile( messageData.user_id, {
+				file: file_path,
+				name: file_name,
 			} );
 			await sendMessage( `抽卡记录文件已导出至${ file_name }` );
 		} catch ( e ) {
@@ -193,6 +195,7 @@ async function uploadFile( file_path: string, file_name: string, {
 		}
 	}
 }
+*/
 
 async function export2Excel( {
 	                             info: { uid, lang, export_timestamp },
@@ -267,7 +270,7 @@ async function export2Excel( {
 			await addRowAndSetStyle( sheet, data );
 		}
 		// 设置保护模式，避免用户随意修改内容
-		await sheet.protect( getRandomStr( 20 ), {
+		await sheet.protect( getRandomString( 20 ), {
 			formatCells: true,
 			formatRows: true,
 			formatColumns: true,
@@ -309,7 +312,7 @@ async function export2Excel( {
 		await addRowAndSetStyle( sheet, data );
 	}
 	// 设置保护模式，避免用户随意修改内容
-	await sheet.protect( getRandomStr( 20 ), {
+	await sheet.protect( getRandomString( 20 ), {
 		formatCells: true,
 		formatRows: true,
 		formatColumns: true,
@@ -332,7 +335,7 @@ async function export2Excel( {
 			const url: string = await upload2Qiniu( export_excel_path, file_name, gacha_config.qiniuOss, redis );
 			// 导出后删掉临时文件
 			fs.unlinkSync( export_excel_path );
-			await sendExportResult( url, logger, sendMessage );
+			await sendExportResult( url, i );
 			return;
 		} catch ( error ) {
 			logger.error( "抽卡记录导出成功，上传 OSS 失败！", error );
@@ -344,7 +347,7 @@ async function export2Excel( {
 			return;
 		}
 	}
-	await uploadFile( export_excel_path, file_name, i );
+	// await uploadFile( export_excel_path, file_name, i );
 }
 
 async function export_gacha_url( user_id: number, sn: string, { redis, sendMessage, auth, logger }: InputParameter ) {
@@ -395,7 +398,7 @@ function getVersion( file: FileManagement ): string {
 	return version.split( "-" )[0];
 }
 
-export async function main( bot: InputParameter ): Promise<void> {
+export default defineDirective( "order", async ( bot: InputParameter ) => {
 	const { sendMessage, messageData, redis, auth } = bot;
 	const { sender: { user_id }, raw_message } = messageData;
 	const reg = new RegExp( /(?<type>json|excel|url)(\s)*(?<sn>\d+)?/ );
@@ -404,6 +407,12 @@ export async function main( bot: InputParameter ): Promise<void> {
 	const sn: string = res?.groups?.sn || "";
 	if ( type === 'url' ) {
 		await export_gacha_url( user_id, sn, bot );
+		return;
+	}
+	
+	if ( !( gacha_config.qiniuOss.enable || gacha_config.qiniuOss.uses3 ) ) {
+		bot.logger.warn( "[原神抽卡分析插件] 无法导出，未开启OSS功能，无法发送文件给用户！" );
+		await sendMessage( "无法导出，暂不支持直接发送文件，需要联系 BOT 持有人开启 OSS 功能" );
 		return;
 	}
 	
@@ -463,4 +472,4 @@ export async function main( bot: InputParameter ): Promise<void> {
 	} else {
 		await sendMessage( `不支持的导出类型: ${ raw_message }` );
 	}
-}
+} )

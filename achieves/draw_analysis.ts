@@ -1,17 +1,16 @@
-import { InputParameter } from "@modules/command";
+import { defineDirective, InputParameter } from "@/modules/command";
 import fetch from "node-fetch";
 import bot from "ROOT";
-import { generatorUrl, parseID, sleep } from "../util/util";
-import { RenderResult } from "@modules/renderer";
+import { generatorUrl, htmlDecode, parseID, sleep } from "../util/util";
+import { RenderResult } from "@/modules/renderer";
 import { renderer } from "../init";
-import { MessageRet, Sendable } from "icqq";
-import { Private } from "#genshin/module/private/main";
-import { getPrivateAccount } from "#genshin/utils/private";
-import { GachaUrl } from "#genshin_draw_analysis/util/types";
+import { Private } from "#/genshin/module/private/main";
+import { getPrivateAccount } from "#/genshin/utils/private";
+import { GachaUrl } from "#/genshin_draw_analysis/util/types";
 import { Viewport } from "puppeteer";
 
 
-export async function analysisHandler( idMsg: string, userID: number, sendMessage: ( content: Sendable, allowAt?: boolean ) => Promise<MessageRet> ) {
+export async function analysisHandler( idMsg: string, userID: number, { sendMessage }: InputParameter ) {
 	let id = parseID( idMsg );
 	const viewPort: Viewport = {
 		width: 2000,
@@ -31,14 +30,14 @@ export async function analysisHandler( idMsg: string, userID: number, sendMessag
 	}
 }
 
-export async function main(
-	{ sendMessage, messageData, redis, auth, logger }: InputParameter
-): Promise<void> {
-	const { user_id: userID, raw_message } = messageData;
+export default defineDirective( "order", async ( i ) => {
+	const { sendMessage, messageData, redis, auth, logger } = i;
+	let { user_id: userID, raw_message } = messageData;
 	let url = 'https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?';
 	let style: string = "";
 	let sn: string = "";
 	// 链接方式
+	raw_message = htmlDecode( raw_message );
 	if ( raw_message.startsWith( "https://" ) ) {
 		try {
 			if ( raw_message.indexOf( "getGachaLog?" ) > -1 ) {
@@ -157,5 +156,5 @@ export async function main(
 		await redis.setString( `genshin_draw_analysis_curr_uid-${ userID }`, uid );
 	}
 	
-	await analysisHandler( style, userID, sendMessage );
-}
+	await analysisHandler( style, userID, i );
+} )

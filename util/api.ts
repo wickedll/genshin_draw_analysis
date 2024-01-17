@@ -1,8 +1,8 @@
 import axios, { AxiosError } from "axios";
-import { generateDS, getGameBiz } from "#genshin_draw_analysis/util/util";
-import { guid } from "#genshin/utils/guid";
-import { Cookies } from "#genshin/module";
-import { AuthKey, GachaPoolInfo } from "#genshin_draw_analysis/util/types";
+import { generateDS, getGameBiz } from "#/genshin_draw_analysis/util/util";
+import { guid } from "#/genshin/utils/guid";
+import { Cookies } from "#/genshin/module";
+import { AuthKey, GachaPoolInfo } from "#/genshin_draw_analysis/util/types";
 import bot from "ROOT";
 
 const API = {

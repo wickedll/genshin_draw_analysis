@@ -1,14 +1,14 @@
-import { randomString } from "#genshin/utils/random";
 import { Md5 } from "md5-typescript";
-import { AuthKey, FakeIdFunc, GachaPoolInfo, GachaUrl, QiniuOssConfig } from "#genshin_draw_analysis/util/types";
-import Database from "@modules/database";
+import { AuthKey, FakeIdFunc, GachaPoolInfo, GachaUrl, QiniuOssConfig } from "#/genshin_draw_analysis/util/types";
+import Database from "@/modules/database";
 import { exec } from "child_process";
-import FileManagement from "@modules/file";
-import { generateAuthKey, getSToken, updatePoolId } from "#genshin_draw_analysis/util/api";
-import { getRegion } from "#genshin/utils/region";
+import FileManagement from "@/modules/file";
+import { generateAuthKey, getSToken, updatePoolId } from "#/genshin_draw_analysis/util/api";
+import { getRegion } from "#/genshin/utils/region";
 import fetch from "node-fetch";
 import bot from "ROOT";
 import { createReadStream } from "fs";
+import { getRandomString } from "@/utils/random";
 
 async function sleep( ms: number ): Promise<void> {
 	return new Promise( resolve => setTimeout( resolve, ms ) );
@@ -35,7 +35,7 @@ function parseID( msg: string ): number {
 function generateDS(): string {
 	const n: string = "dWCcD2FsOUXEstC5f9xubswZxEeoBOTc";
 	const i: number = Date.now() / 1000 | 0;
-	const r: string = randomString( 6 ).toLowerCase();
+	const r: string = getRandomString( 6 ).toLowerCase();
 	const c: string = Md5.init( `salt=${ n }&t=${ i }&r=${ r }` );
 	
 	return `${ i },${ r },${ c }`;
@@ -44,8 +44,9 @@ function generateDS(): string {
 export function getGameBiz( first: string ): string {
 	switch ( first ) {
 		case "1":
-			return "hk4e_cn";
 		case "2":
+		case "3":
+		case "4":
 			return "hk4e_cn";
 		case "5":
 			return "hk4e_cn";
@@ -288,15 +289,7 @@ export async function generatorUrl( cookie: string, game_uid: string, mysID: num
 }
 
 export async function getTimeOut( key: string ): Promise<number> {
-	return new Promise( ( resolve, reject ) => {
-		bot.redis.client.ttl( key, ( error: Error | null, data: number | null ) => {
-			if ( error !== null ) {
-				reject( error );
-			} else {
-				resolve( data || -2 );
-			}
-		} );
-	} );
+	return await bot.redis.client.ttl( key );
 }
 
 export function secondToString( ttl: number ): string {
@@ -304,6 +297,14 @@ export function secondToString( ttl: number ): string {
 	const minute = Math.floor( ( ttl - hour * 3600 ) / 60 );
 	const second = ttl % 60;
 	return `${ hour } 时 ${ minute } 分 ${ second } 秒`;
+}
+
+export function htmlDecode( str: string ): string {
+	str = str.replace( /&#(\d+);/gi, function ( match, numStr ) {
+		const num = parseInt( numStr, 10 );
+		return String.fromCharCode( num );
+	} );
+	return str.replace( /&amp;/gi, "&" );
 }
 
 export { sleep, parseID, generateDS };

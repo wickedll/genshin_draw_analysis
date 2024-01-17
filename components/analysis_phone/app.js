@@ -9,6 +9,9 @@ const template =
 
 const { defineComponent } = Vue;
 import BoxItem from "./item.js";
+import { urlParamsGet } from "../../assets/js/url.js";
+import request from "../../assets/js/http.js";
+import { sortData } from "../../assets/js/util.js";
 
 export default defineComponent( {
 	name: "AnalysisPhoneApp",
@@ -20,8 +23,8 @@ export default defineComponent( {
 	},
 	setup() {
 		const cardPool = { '301': '限定池', '302': '武器池', '200': '常驻池', '100': '新手池' };
-		const urlParams = parseURL( location.search );
-		const data = request( `/api/analysis/result?qq=${ urlParams.qq }` );
+		const urlParams = urlParamsGet( location.href );
+		const data = request( `/analysis/result?qq=${ urlParams.qq }` );
 		let data2 = {};
 		const result = JSON.parse( data.data );
 		let uid = "";

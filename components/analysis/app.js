@@ -90,6 +90,9 @@ const template =
 </div>`;
 
 const { defineComponent } = Vue;
+import { urlParamsGet } from "../../assets/js/url.js";
+import request from "../../assets/js/http.js";
+import { getRandomNum, sortData } from "../../assets/js/util.js";
 
 export default defineComponent( {
 	name: "AnalysisApp",
@@ -305,8 +308,8 @@ export default defineComponent( {
 		}
 	},
 	setup() {
-		const urlParams = parseURL( location.search );
-		const data = request( `/api/analysis/result?qq=${ urlParams.qq }` );
+		const urlParams = urlParamsGet( location.href );
+		const data = request( `/analysis/result?qq=${ urlParams.qq }` );
 		let data2 = {};
 		const result = JSON.parse( data.data );
 		let uid = "";
