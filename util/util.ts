@@ -44,8 +44,9 @@ function generateDS(): string {
 export function getGameBiz( first: string ): string {
 	switch ( first ) {
 		case "1":
-			return "hk4e_cn";
 		case "2":
+		case "3":
+		case "4":
 			return "hk4e_cn";
 		case "5":
 			return "hk4e_cn";
