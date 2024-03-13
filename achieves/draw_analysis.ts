@@ -13,8 +13,8 @@ import { Viewport } from "puppeteer";
 export async function analysisHandler( idMsg: string, userID: number, { sendMessage }: InputParameter ) {
 	let id = parseID( idMsg );
 	const viewPort: Viewport = {
-		width: 2000,
-		height: 1000,
+		width: 1000,
+		height: 2000,
 		deviceScaleFactor: 2
 	};
 	const res: RenderResult = await renderer.asSegment(
@@ -92,8 +92,7 @@ export default defineDirective( "order", async ( i ) => {
 	let url2 = url.replace( /&(lt|gt|nbsp|amp|quot);/ig, function ( all, t ) {
 		return arrEntities[t];
 	} );
-	// const cardPool = {'301': '限定池1', '302': '武器池', '200': '常驻池', '400': '限定池2', '100': '新手池'};
-	const cardPool = { '301': '限定池1', '302': '武器池', '200': '常驻池', '100': '新手池' };
+	const cardPool = { '301': '限定池1', '302': '武器池', '200': '常驻池', '100': '新手池', '500': '混合卡池' };
 	const keys = Object.keys( cardPool );
 	let uid = '';
 	const urlObj = new URL( url2 );

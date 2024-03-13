@@ -4,6 +4,10 @@
     align-items: center;
     justify-content: center;
 }
+
+.container-wrap {
+	flex-wrap: wrap;
+}
 .main2{
     display: flex;
     flex-direction: column;
@@ -30,7 +34,8 @@
 }
 .title{
 }
-.total {
+
+.total, .box-wc-lv4 {
 	font-size: 14px;
 	color: rgba(0, 0, 0, 0.85);
 	display: block;
@@ -43,12 +48,16 @@
 	color: green;
 }
 
+.wc_lv4 {
+	color: red;
+}
+
 .info {
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: flex-start;
-	height: 250px;
+	height: 400px;
 	padding: 20px 50px 0;
 }
 

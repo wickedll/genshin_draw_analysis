@@ -8,7 +8,7 @@ import bot from "ROOT";
 const API = {
 	AUTH_KEY: "https://api-takumi.mihoyo.com/binding/api/genAuthKey",
 	TOKEN: "https://api-takumi.mihoyo.com/auth/api/getMultiTokenByLoginTicket",
-	POOL: "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/gacha/list.json"
+	POOL: "https://operation-webstatic.mihoyo.com/gacha_info/hk4e/cn_gf01/gacha/list.json"
 }
 
 const HEADERS = {

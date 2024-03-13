@@ -30,7 +30,7 @@ import FileManagement from "@/modules/file";
 import { getRandomString } from "@/utils/random";
 import { segment } from "@/modules/lib";
 
-const gacha_types = [ "301", "400", "302", "100", "200" ];
+const gacha_types = [ "301", "400", "302", "100", "200", "500" ];
 
 async function sendExportResult( url: string, { logger, sendMessage }: InputParameter ) {
 	if ( gacha_config.qrcode ) {
@@ -451,6 +451,17 @@ export default defineDirective( "order", async ( bot: InputParameter ) => {
 		}
 	}
 	
+	function getTimeZone( first: string ) {
+		switch ( first ) {
+			case "6":
+				return -5;
+			case "7":
+				return 1;
+			default:
+				return 8;
+		}
+	}
+	
 	const info: Standard_Gacha_Info = {
 		uid,
 		lang,
@@ -458,7 +469,8 @@ export default defineDirective( "order", async ( bot: InputParameter ) => {
 		export_app_version: `v${ getVersion( bot.file ) }`,
 		export_time: moment().format( "yy-MM-DD HH:mm:ss" ),
 		export_timestamp: Date.now() / 1000 | 0,
-		uigf_version: 'v2.2'
+		uigf_version: 'v3.0',
+		region_time_zone: getTimeZone( uid[0] )
 	}
 	const export_data: Standard_Gacha = {
 		info,

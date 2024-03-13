@@ -42,6 +42,10 @@ const template =
 			<span class="info-item-num" style="color: red">{{ data.zo.name || '暂无' }}</span>
 			<span class="info-item-ms">最欧五星</span>
 		</div>
+		<div class="info-item">
+			<span class="info-item-num" style="color: red">{{ data.wc_lv4 }}</span>
+			<span class="info-item-ms">未出四星</span>
+		</div>
 		<div class="fg">
 			<div class="fg-head"></div>
 			<div class="fg-content"></div>

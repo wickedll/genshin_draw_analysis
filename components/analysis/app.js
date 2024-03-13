@@ -1,13 +1,14 @@
 const template =
 	`<div class="main2">
 	<span class="header">UID{{uid}}的抽卡记录分析</span>
-	<div class="main">
+	<div class="main" :class="active">
 		<div class="item" v-show="info['301'].total > 0">
 			<span class="title">角色活动祈愿</span>
 			<div id="up-role" style="width:400px;height:400px;"></div>
 			<span class="time">{{info['301'].time}}</span>
 			<div class="info">
-				<p><span class="total">总计 <span class="lj">{{ info['301'].total }}</span> 抽 已累计 <span class="wc">{{info['301'].wc}}</span> 抽未出5星</span></p>
+				<p><span class="total">总计 <span class="lj">{{ info['301'].total }}</span> 抽 已累计 <span class="wc">{{info['301'].wc}}</span> 抽未出5星</span>
+				<div class="box-wc-lv4">已累计 <span class="wc_lv4">{{info['301'].wc_lv4}}</span> 抽未出4星</div></p>
 				<p>
 					<span class="five"><span class="statistics">5星：{{info['301'].w5+info['301'].j5}}</span>[{{info['301'].lv5}}]</span>
 					<span class="four"><span class="statistics">4星：{{info['301'].w4+info['301'].j4}}</span>[{{info['301'].lv4}}]</span>
@@ -27,7 +28,8 @@ const template =
 			<div id="up-arms" style="width:400px;height:400px;"></div>
 			<span class="time">{{info['302'].time}}</span>
 			<div class="info">
-				<p><span class="total">总计 <span class="lj">{{ info['302'].total }}</span> 抽 已累计 <span class="wc">{{info['302'].wc}}</span> 抽未出5星</span></p>
+				<p><span class="total">总计 <span class="lj">{{ info['302'].total }}</span> 抽 已累计 <span class="wc">{{info['302'].wc}}</span> 抽未出5星</span>
+				<div class="box-wc-lv4">已累计 <span class="wc_lv4">{{info['302'].wc_lv4}}</span> 抽未出4星</div></p>
 				<p>
 					<span class="five"><span class="statistics">5星：{{info['302'].w5+info['302'].j5}}</span>[{{info['302'].lv5}}]</span>
 					<span class="four"><span class="statistics">4星：{{info['302'].w4+info['302'].j4}}</span>[{{info['302'].lv4}}]</span>
@@ -42,12 +44,34 @@ const template =
 				<p><span class="total">5星平均出货次数为：<span class="per">{{info['302'].per}}</span></span></p>
 			</div>
 		</div>
+		<div class="item" v-show="info['500'].total > 0">
+			<span class="title">集录祈愿</span>
+			<div id="chronicled" style="width:400px;height:400px;"></div>
+			<span class="time">{{info['500'].time}}</span>
+			<div class="info">
+				<p><span class="total">总计 <span class="lj">{{ info['500'].total }}</span> 抽 已累计 <span class="wc">{{info['500'].wc}}</span> 抽未出5星</span>
+				<div class="box-wc-lv4">已累计 <span class="wc_lv4">{{info['500'].wc_lv4}}</span> 抽未出4星</div></p>
+				<p>
+					<span class="five"><span class="statistics">5星：{{info['500'].w5+info['500'].j5}}</span>[{{info['500'].lv5}}]</span>
+					<span class="four"><span class="statistics">4星：{{info['500'].w4+info['500'].j4}}</span>[{{info['500'].lv4}}]</span>
+					<span class="third"><span class="statistics">3星：{{info['500'].w3}}</span>[{{info['500'].lv3}}]</span>
+				</p>
+				<p><div class="jl">
+					<span>5星历史记录：</span>
+					<span v-for="el in info['500'].history" class="jl2">
+						<span :style="{'color': getColor(el.name)}">{{el.name}}[{{el.count}}]&nbsp;</span>
+					</span>
+				</div></p>
+				<p><span class="total">5星平均出货次数为：<span class="per">{{info['500'].per}}</span></span></p>
+			</div>
+		</div>
 		<div class="item" v-show="info['200'].total > 0">
 			<span class="title">常驻祈愿</span>
 			<div id="permanent" style="width:400px;height:400px;"></div>
 			<span class="time">{{info['200'].time}}</span>
 			<div class="info">
-				<p><span class="total">总计 <span class="lj">{{ info['200'].total }}</span> 抽 已累计 <span class="wc">{{info['200'].wc}}</span> 抽未出5星</span></p>
+				<p><span class="total">总计 <span class="lj">{{ info['200'].total }}</span> 抽 已累计 <span class="wc">{{info['200'].wc}}</span> 抽未出5星</span>
+				<div class="box-wc-lv4">已累计 <span class="wc_lv4">{{info['200'].wc_lv4}}</span> 抽未出4星</div></p>
 				<p>
 					<span class="five"><span class="statistics">5星：{{info['200'].w5+info['200'].j5}}</span>[{{info['200'].lv5}}]</span>
 					<span class="four"><span class="statistics">4星：{{info['200'].w4+info['200'].j4}}</span>[{{info['200'].lv4}}]</span>
@@ -68,7 +92,8 @@ const template =
 			<div id="novice" style="width:400px;height:400px;"></div>
 			<span class="time">{{info['100'].time}}</span>
 			<div class="info">
-				<p><span class="total">总计 <span class="lj">{{ info['100'].total }}</span> 抽 已累计 <span class="wc">{{info['100'].wc}}</span> 抽未出5星</span></p>
+				<p><span class="total">总计 <span class="lj">{{ info['100'].total }}</span> 抽 已累计 <span class="wc">{{info['100'].wc}}</span> 抽未出5星</span>
+				<div class="box-wc-lv4">已累计 <span class="wc_lv4">{{info['100'].wc_lv4}}</span> 抽未出4星</div></p>
 				<p>
 					<span class="five"><span class="statistics">5星：{{info['100'].w5+info['100'].j5}}</span>[{{info['100'].lv5}}]</span>
 					<span class="four"><span class="statistics">4星：{{info['100'].w4+info['100'].j4}}</span>[{{info['100'].lv4}}]</span>
@@ -302,6 +327,57 @@ export default defineComponent( {
 					};
 					myChart200.setOption( options200 );
 					break;
+				case 500:
+					if ( data[element].total === 0 ) {
+						break;
+					}
+					// 初始化图表标签
+					const myChart500 = echarts.init( document.getElementById( 'chronicled' ) );
+					const options500 = {
+						legend: {
+							left: 'center',
+							top: '10%',
+							selected: {
+								'三星武器': data[element].w3 <= 20
+							}
+						},
+						textStyle: {
+							fontFamily: 'GachaFont',
+							fontStyle: 'normal',
+						},
+						series: [ {
+							type: 'pie',
+							stillShowZeroSum: false,
+							top: 50,
+							radius: '50%',
+							startAngle: 70,
+							color: [ '#fac858', '#ee6666', '#5470c6', '#91cc75', '#73c0de' ],
+							data: [
+								{
+									value: data[element].j5,
+									name: '五星角色'
+								},
+								{
+									value: data[element].w5,
+									name: '五星武器'
+								},
+								{
+									value: data[element].j4,
+									name: '四星角色'
+								},
+								{
+									value: data[element].w4,
+									name: '四星武器'
+								},
+								{
+									value: data[element].w3,
+									name: '三星武器'
+								}
+							]
+						} ]
+					};
+					myChart500.setOption( options500 );
+					break;
 				default:
 					break;
 			}
@@ -313,6 +389,7 @@ export default defineComponent( {
 		let data2 = {};
 		const result = JSON.parse( data.data );
 		let uid = "";
+		let active_num = 0;
 		for ( let index = 0; index < result.length; index++ ) {
 			const element = result[index];
 			let total = element.data.length;
@@ -326,17 +403,21 @@ export default defineComponent( {
 			let count = 1;//出五星计数
 			let arr5 = [];
 			let index5 = 0;
+			let wc_lv4 = 0;
 			for ( let index = 0; index < total; index++ ) {
 				const item = element.data[index];
 				uid = item.uid;
 				if ( item.rank_type === "3" && item.item_type === '武器' ) {
 					w3++;
+					wc_lv4++;
 				}
 				if ( item.rank_type === "4" && item.item_type === '武器' ) {
 					w4++;
+					wc_lv4 = 0;
 				}
 				if ( item.rank_type === "5" && item.item_type === '武器' ) {
 					w5++;
+					wc_lv4++;
 					arr5.push( { count, name: item.name } );
 					total5 += count;
 					count = 0;
@@ -345,6 +426,7 @@ export default defineComponent( {
 				
 				if ( item.rank_type === "5" && item.item_type === '角色' ) {
 					j5++;
+					wc_lv4++;
 					total5 += count;
 					arr5.push( { count, name: item.name } );
 					count = 0;
@@ -353,9 +435,11 @@ export default defineComponent( {
 				
 				if ( item.rank_type === "4" && item.item_type === '角色' ) {
 					j4++;
+					wc_lv4 = 0;
 				}
 				count++;
 			}
+			total > 0 && active_num++;
 			data2[element.key] = {
 				w5,
 				j5,
@@ -366,6 +450,7 @@ export default defineComponent( {
 				per: total5 === 0 ? 0 : ( total5 / ( w5 + j5 ) ).toFixed( 2 ),
 				total,
 				wc: total > 0 ? ( total - index5 - 1 ) : 0,
+				wc_lv4,
 				lv5: total === 0 ? ( 0 + '%' ) : ( ( ( w5 + j5 ) / total * 100 ).toFixed( 2 ) + '%' ),
 				lv4: total === 0 ? ( 0 + '%' ) : ( ( ( w4 + j4 ) / total * 100 ).toFixed( 2 ) + '%' ),
 				lv3: total === 0 ? ( 0 + '%' ) : ( ( ( w3 ) / total * 100 ).toFixed( 2 ) + '%' ),
@@ -391,10 +476,14 @@ export default defineComponent( {
 			nameColor[name] = color;
 			return color;
 		}
+		const active = {
+			"container-wrap": active_num >= 5
+		}
 		return {
 			info: data2,
 			uid,
-			getColor
+			getColor,
+			active
 		}
 	}
 } );

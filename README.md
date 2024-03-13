@@ -13,6 +13,7 @@
   ，登录个人通行证账号后 `F12` 在 `Console` 或者控制台栏里输入 `document.cookie` 回车获取。或者在新建书签，在书签的网址处填写下面的代码。
 - `Cookie` 也可以参考[胡桃工具箱](https://hut.ao/advanced/get-stoken-cookie-from-the-third-party.html)
   的这篇文章直接获取带有 `Stoken` 的 `Cookie`。
+- `Cookie` 也可以使用 [mihoyo-login](https://github.com/BennettChina/mihoyo-login) 插件获取。
 
 ```js
 javascript:(function () {
