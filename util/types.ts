@@ -38,6 +38,7 @@ export interface Standard_Gacha_Info {
 	export_app: string;
 	export_app_version: string;
 	uigf_version: string;
+	region_time_zone: number;
 }
 
 export interface Standard_Gacha_Data {

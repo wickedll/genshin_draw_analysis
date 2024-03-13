@@ -91,22 +91,31 @@ const gacha_types_zh_cn = {
 	"400": "角色活动祈愿-2",
 	"302": "武器活动祈愿",
 	"200": "常驻祈愿",
-	"100": "新手祈愿"
+	"100": "新手祈愿",
+	"500": "集录祈愿"
 };
 const gacha_types_en_us = {
 	"301": "Character Event Wish",
 	"400": "Character Event Wish-2",
 	"302": "Weapon Event Wish",
 	"200": "Standard Wish",
-	"100": "Beginner's Wish"
+	"100": "Beginner's Wish",
+	"500": "Chronicled Wish"
 };
 
-const sheet_names_zh_cn = { "301": "角色活动祈愿", "302": "武器活动祈愿", "200": "常驻祈愿", "100": "新手祈愿" };
+const sheet_names_zh_cn = {
+	"301": "角色活动祈愿",
+	"302": "武器活动祈愿",
+	"200": "常驻祈愿",
+	"100": "新手祈愿",
+	"500": "集录祈愿"
+};
 const sheet_names_en_us = {
 	"301": "Character Event Wish",
 	"302": "Weapon Event Wish",
 	"200": "Standard Wish",
-	"100": "Beginner's Wish"
+	"100": "Beginner's Wish",
+	"500": "Chronicled Wish"
 };
 
 export function get_sheet_name( type: string ): string {
@@ -247,7 +256,7 @@ export async function generatorUrl( cookie: string, game_uid: string, mysID: num
 		"sign_type": sign_type,
 		"auth_appid": "webview_gacha",
 		"init_type": `${ gacha_type || "200" }`,
-		"gacha_id": `${ gacha_id || "3c9dbe90839b4482907f14f08321b6fed9d7de11" }`,
+		"gacha_id": `${ gacha_id || "c49064165548e94503d2e53b9f120c5289b0bc80" }`,
 		"timestamp": ( Date.now() / 1000 | 0 ).toString( 10 ),
 		"lang": "zh-cn",
 		"device_type": "mobile",
