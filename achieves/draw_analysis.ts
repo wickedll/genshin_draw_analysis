@@ -33,7 +33,7 @@ export async function analysisHandler( idMsg: string, userID: number, { sendMess
 export default defineDirective( "order", async ( i ) => {
 	const { sendMessage, messageData, redis, auth, logger } = i;
 	let { user_id: userID, raw_message } = messageData;
-	let url = 'https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?';
+	let url = 'https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog?';
 	let style: string = "";
 	let sn: string = "";
 	// 链接方式
@@ -115,6 +115,10 @@ export default defineDirective( "order", async ( i ) => {
 			}
 			url = urlObj.toString().replace( /\+/g, "%2B" )
 			let response = await fetch( url, { method: "GET" } );
+			if ( response.status !== 200 ) {
+				await sendMessage( `抽卡记录拉取失败(${ response.statusText })，请检查URL！` );
+				return;
+			}
 			let data = await response.json();
 			if ( data.retcode !== 0 && data.message && data.message.toLowerCase() == 'visit too frequently' ) {
 				await sleep( 5000 );
