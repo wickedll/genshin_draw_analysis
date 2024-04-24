@@ -271,11 +271,11 @@ export async function generatorUrl( cookie: string, game_uid: string, mysID: num
 	}
 	let log_html_url: string;
 	if ( game_biz === 'hk4e_cn' ) {
-		log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha/index.html?";
-		url = "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?";
+		log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha-v3/index.html?";
+		url = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog?";
 	} else {
-		log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha/index.html?";
-		url = "https://hk4e-api-os.mihoyo.com/event/gacha_info/api/getGachaLog?";
+		log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha-v3/index.html?";
+		url = "https://hk4e-api-os.hoyoverse.com/gacha_info/api/getGachaLog?";
 	}
 	const paramsStr = obj2ParamsStr( params );
 	url += paramsStr;
@@ -285,6 +285,9 @@ export async function generatorUrl( cookie: string, game_uid: string, mysID: num
 	// 校验URL
 	const tmp: string = encodeURI( url ).replace( /\+/g, "%2B" );
 	let response = await fetch( tmp, { method: "GET" } );
+	if ( response.status !== 200 ) {
+		throw `抽卡链接生成失败: ${ response.statusText }`;
+	}
 	let data = await response.json();
 	if ( data.retcode === 0 ) {
 		return {
