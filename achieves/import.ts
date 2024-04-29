@@ -1,4 +1,4 @@
-import { InputParameter } from "@/modules/command";
+import { defineDirective, InputParameter } from "@/modules/command";
 import fetch from "node-fetch";
 import { Gacha_Info, Standard_Gacha } from "#/genshin_draw_analysis/util/types";
 import { fakeIdFn } from "#/genshin_draw_analysis/util/util";
@@ -56,7 +56,7 @@ async function import_from_excel( file_url: string, { redis, sendMessage }: Inpu
 	await sendMessage( `${ import_uid } 的 ${ sheetValues.length } 条抽卡记录数据已导入。` );
 }
 
-export async function main( bot: InputParameter ): Promise<void> {
+export default defineDirective( "order", async ( bot: InputParameter ) => {
 	const { sendMessage, messageData, client, logger } = bot;
 	const { raw_message } = messageData;
 	const reg = new RegExp( /(?<import_type>json|excel)\s*(?<url>https?:\/\/(?:www\.)?[-a-zA-Z\d@:%._+~#=]{1,256}\.[a-zA-Z\d()]{1,6}\b[-a-zA-Z\d()!@:%_+.~#?&/=]*)?/ );
@@ -79,4 +79,4 @@ export async function main( bot: InputParameter ): Promise<void> {
 	}
 	
 	await sendMessage( "暂不支持该方式导入，请发送文件链接导入。" );
-}
+} )
