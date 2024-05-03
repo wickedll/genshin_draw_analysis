@@ -33,7 +33,8 @@ function parseID( msg: string ): number {
 }
 
 function generateDS(): string {
-	const n: string = "dWCcD2FsOUXEstC5f9xubswZxEeoBOTc";
+	// K2 salt
+	const n: string = "BIPaooxbWZW02fGHZL1If26mYCljPgst";
 	const i: number = Date.now() / 1000 | 0;
 	const r: string = getRandomString( 6 ).toLowerCase();
 	const c: string = Md5.init( `salt=${ n }&t=${ i }&r=${ r }` );
