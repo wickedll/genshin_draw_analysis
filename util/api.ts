@@ -47,7 +47,7 @@ export async function generateAuthKey( uid: string, server: string, cookie: stri
 				return;
 			}
 			if ( retcode !== 0 ) {
-				reject( "米游社接口报错: " + message );
+				reject( "[authKey] 米游社接口报错: " + message );
 				return;
 			}
 			resolve( data );

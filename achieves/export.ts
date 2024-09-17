@@ -370,19 +370,15 @@ async function export_gacha_url( user_id: number, sn: string, { redis, sendMessa
 	}
 	let gen_res: GachaUrl | undefined
 	try {
-		gen_res = await generatorUrl( info.setting.stoken, info.setting.uid, info.setting.mysID, info.setting.server );
+		gen_res = await generatorUrl( info.setting.stoken, info.setting.uid, info.setting.server );
 	} catch ( e ) {
 		logger.error( <string>e );
 		await sendMessage( <string>e );
 		return;
 	}
 	if ( gen_res ) {
-		const { api_log_url, log_html_url, cookie } = gen_res;
+		const { api_log_url, log_html_url } = gen_res;
 		url = api_log_url;
-		// 更新ck
-		if ( cookie ) {
-			await info.replaceCookie( cookie );
-		}
 		// 校验成功放入缓存，不需要频繁生成URL
 		await redis.setString( `genshin_draw_analysis_url-${ user_id }.${ sn || "0" }`, url, 24 * 60 * 60 );
 		await redis.setString( key, log_html_url, 24 * 60 * 60 );

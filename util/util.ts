@@ -3,7 +3,7 @@ import { AuthKey, FakeIdFunc, GachaPoolInfo, GachaUrl, QiniuOssConfig } from "#/
 import Database from "@/modules/database";
 import { exec } from "child_process";
 import FileManagement from "@/modules/file";
-import { generateAuthKey, getSToken, updatePoolId } from "#/genshin_draw_analysis/util/api";
+import { generateAuthKey, updatePoolId } from "#/genshin_draw_analysis/util/api";
 import { getRegion } from "#/genshin/utils/region";
 import fetch from "node-fetch";
 import bot from "ROOT";
@@ -67,8 +67,12 @@ export function obj2ParamsStr( obj: object ): string {
 export function cookie2Obj( cookie: string ): any {
 	return decodeURIComponent( cookie ).split( ";" )
 		.filter( item => !!item && item.trim().length > 0 )
-		.map( item => item.split( '=' ) )
-		.reduce( ( acc, [ k, v ] ) => ( acc[k.trim().replace( '"', '' )] = v ) && acc, {} );
+		.reduce( ( acc, item ) => {
+			const delimiter = item.indexOf( '=' );
+			const key = item.substring( 0, delimiter ).trim();
+			acc[key] = item.substring( delimiter + 1 ).trim();
+			return acc;
+		}, {} );
 }
 
 export const fakeIdFn: () => FakeIdFunc = () => {
@@ -229,25 +233,10 @@ export function checkDependencies( file: FileManagement, ...dependencies ): stri
 	return dependencies.filter( dependency => !keys.includes( dependency ) );
 }
 
-export async function generatorUrl( cookie: string, game_uid: string, mysID: number, server: string ): Promise<GachaUrl | undefined> {
+export async function generatorUrl( cookie: string, game_uid: string, server: string ): Promise<GachaUrl | undefined> {
 	let url: string;
-	let flag: boolean = false;
-	// 如果已有 stoken 就不需要再去请求新的，可以解决 login_ticket 经常过期的问题
 	if ( !cookie.includes( "stoken" ) ) {
-		const { login_ticket } = cookie2Obj( cookie );
-		if ( !login_ticket ) {
-			throw "cookie缺少login_ticket无法生成URL";
-		}
-		if ( !cookie.includes( "stuid" ) ) {
-			cookie = cookie + ";stuid=" + mysID;
-		}
-		if ( !cookie.includes( "login_uid" ) ) {
-			cookie = cookie + ";login_uid=" + mysID;
-		}
-		const { list } = await getSToken( mysID, login_ticket, cookie );
-		const sToken: string = list[0].token;
-		cookie = cookie + ";stoken=" + sToken;
-		flag = true;
+		throw new Error( "Cookie 缺少 SToken" );
 	}
 	const { authkey, authkey_ver, sign_type }: AuthKey = await generateAuthKey( game_uid, server, cookie );
 	const { gacha_id, gacha_type }: GachaPoolInfo = await updatePoolId();
@@ -276,7 +265,7 @@ export async function generatorUrl( cookie: string, game_uid: string, mysID: num
 		url = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog?";
 	} else {
 		log_html_url = "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha-v3/index.html?";
-		url = "https://hk4e-api-os.hoyoverse.com/gacha_info/api/getGachaLog?";
+		url = "https://public-operation-hk4e-sg.hoyoverse.com/gacha_info/api/getGachaLog?";
 	}
 	const paramsStr = obj2ParamsStr( params );
 	url += paramsStr;
@@ -293,8 +282,7 @@ export async function generatorUrl( cookie: string, game_uid: string, mysID: num
 	if ( data.retcode === 0 ) {
 		return {
 			api_log_url: tmp,
-			log_html_url,
-			cookie: flag ? cookie : undefined
+			log_html_url
 		}
 	} else {
 		throw `抽卡链接生成失败: ${ data.message }`;
